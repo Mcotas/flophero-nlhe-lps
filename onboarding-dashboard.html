@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FlopHero Onboarding Dashboard</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #121212;
+    --surface: #1E1E1E;
+    --surface2: #2A2A2A;
+    --border: #333;
+    --text: #E0E0E0;
+    --text-dim: #999;
+    --accent: #FFC107;
+    --accent-dim: rgba(255, 193, 7, 0.15);
+    --green: #22C55E;
+    --green-dim: rgba(34, 197, 94, 0.15);
+    --red: #EF4444;
+    --red-dim: rgba(239, 68, 68, 0.15);
+    --blue: #3B82F6;
+    --blue-dim: rgba(59, 130, 246, 0.15);
+    --purple: #A855F7;
+    --purple-dim: rgba(168, 85, 247, 0.15);
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 24px;
+    min-height: 100vh;
+  }
+
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 32px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .header h1 {
+    font-size: 24px;
+    font-weight: 600;
+    color: #fff;
+  }
+
+  .header h1 span { color: var(--accent); }
+
+  .header .status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--text-dim);
+  }
+
+  .header .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  /* Flow Pipeline */
+  .pipeline {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 32px;
+    overflow-x: auto;
+  }
+
+  .pipeline-step {
+    flex: 1;
+    min-width: 130px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    position: relative;
+  }
+
+  .pipeline-step.active { border-color: var(--accent); }
+
+  .pipeline-step .step-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+
+  .pipeline-step .step-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 4px;
+  }
+
+  .pipeline-step .step-desc {
+    font-size: 11px;
+    color: var(--text-dim);
+    line-height: 1.4;
+  }
+
+  .pipeline-arrow {
+    display: flex;
+    align-items: center;
+    color: var(--accent);
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  /* KPI Grid */
+  .section-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--accent);
+    margin-bottom: 16px;
+    margin-top: 8px;
+  }
+
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  .kpi-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    transition: border-color 0.2s;
+  }
+
+  .kpi-card:hover { border-color: var(--accent); }
+
+  .kpi-card .kpi-phase {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-bottom: 12px;
+  }
+
+  .kpi-card .kpi-phase.p1 { color: var(--accent); background: var(--accent-dim); }
+  .kpi-card .kpi-phase.p2 { color: var(--blue); background: var(--blue-dim); }
+  .kpi-card .kpi-phase.p3 { color: var(--green); background: var(--green-dim); }
+  .kpi-card .kpi-phase.p4 { color: var(--purple); background: var(--purple-dim); }
+  .kpi-card .kpi-phase.gate { color: var(--red); background: var(--red-dim); }
+
+  .kpi-card .kpi-name {
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+    line-height: 1.3;
+  }
+
+  .kpi-card .kpi-values {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .kpi-card .kpi-actual {
+    font-size: 32px;
+    font-weight: 700;
+    color: #fff;
+  }
+
+  .kpi-card .kpi-actual.pending {
+    color: var(--text-dim);
+    font-size: 24px;
+  }
+
+  .kpi-card .kpi-target {
+    font-size: 13px;
+    color: var(--text-dim);
+  }
+
+  .kpi-card .kpi-target span { color: var(--accent); }
+
+  .kpi-bar {
+    height: 4px;
+    background: var(--surface2);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .kpi-bar-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.5s ease;
+  }
+
+  .kpi-bar-fill.good { background: var(--green); }
+  .kpi-bar-fill.warning { background: var(--accent); }
+  .kpi-bar-fill.pending { background: var(--border); }
+
+  /* A/B Tests */
+  .tests-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+
+  .test-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .test-card .test-num {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    background: var(--accent-dim);
+    color: var(--accent);
+    font-size: 13px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .test-card .test-content { flex: 1; }
+
+  .test-card .test-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 2px;
+  }
+
+  .test-card .test-measure {
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+
+  .test-card .test-status {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+
+  .test-card .test-status.planned {
+    color: var(--text-dim);
+    background: var(--surface2);
+  }
+
+  /* Decisions */
+  .decisions-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+
+  .decision-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 8px;
+    padding: 16px 20px;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+
+  .decision-card .decision-icon {
+    font-size: 16px;
+    color: var(--accent);
+    margin-top: 1px;
+    flex-shrink: 0;
+  }
+
+  .decision-card .decision-text {
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.5;
+  }
+
+  .decision-card .decision-impact {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 4px;
+  }
+
+  /* Footer */
+  .footer {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .footer .footer-text {
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+
+  .footer .footer-logo {
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+  }
+
+  .footer .footer-logo span { color: var(--accent); }
+
+  /* Editable values */
+  .editable {
+    cursor: pointer;
+    border-bottom: 1px dashed var(--border);
+    transition: border-color 0.2s;
+  }
+
+  .editable:hover { border-color: var(--accent); }
+
+  .note {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-bottom: 24px;
+    padding: 10px 14px;
+    background: var(--surface);
+    border-radius: 6px;
+    border: 1px solid var(--border);
+  }
+
+  @media (max-width: 768px) {
+    body { padding: 16px; }
+    .kpi-grid { grid-template-columns: 1fr 1fr; }
+    .tests-grid { grid-template-columns: 1fr; }
+    .decisions-list { grid-template-columns: 1fr; }
+    .pipeline { flex-direction: column; }
+    .pipeline-arrow { transform: rotate(90deg); justify-content: center; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Onboarding <span>Dashboard</span></h1>
+  <div class="status">
+    <div class="status-dot"></div>
+    Pre-launch (targets only)
+  </div>
+</div>
+
+<div class="note">
+  KPI values will be populated after launch. Click any "--" value to manually enter data. Targets based on PLG SaaS benchmarks.
+</div>
+
+<!-- Architecture Flow -->
+<div class="section-title">Architecture Flow</div>
+<div class="pipeline">
+  <div class="pipeline-step active">
+    <div class="step-label">Part 0</div>
+    <div class="step-title">Landing</div>
+    <div class="step-desc">5-min skill check CTA. Game via landing page.</div>
+  </div>
+  <div class="pipeline-arrow">&rarr;</div>
+  <div class="pipeline-step">
+    <div class="step-label">Part 1</div>
+    <div class="step-title">Skill Check</div>
+    <div class="step-desc">15 spots, test+reveal, honest tendencies.</div>
+  </div>
+  <div class="pipeline-arrow">&rarr;</div>
+  <div class="pipeline-step">
+    <div class="step-label">Gate</div>
+    <div class="step-title">Sign-Up</div>
+    <div class="step-desc">Import hands vs Keep training.</div>
+  </div>
+  <div class="pipeline-arrow">&rarr;</div>
+  <div class="pipeline-step">
+    <div class="step-label">Part 2</div>
+    <div class="step-title">Activation</div>
+    <div class="step-desc">Path A: Real product. Path B: More drills.</div>
+  </div>
+  <div class="pipeline-arrow">&rarr;</div>
+  <div class="pipeline-step">
+    <div class="step-label">Part 3</div>
+    <div class="step-title">Retention</div>
+    <div class="step-desc">Day 1, 3, 7 onboarding + bitsize drills.</div>
+  </div>
+  <div class="pipeline-arrow">&rarr;</div>
+  <div class="pipeline-step">
+    <div class="step-label">Part 4</div>
+    <div class="step-title">Lifecycle</div>
+    <div class="step-desc">Re-engagement triggers + milestones.</div>
+  </div>
+</div>
+
+<!-- KPIs -->
+<div class="section-title">Key Performance Indicators</div>
+<div class="kpi-grid">
+
+  <div class="kpi-card">
+    <div class="kpi-phase p1">Part 1</div>
+    <div class="kpi-name">Drill Start Rate</div>
+    <div class="kpi-values">
+      <div class="kpi-actual pending" contenteditable="true" data-target="80">--</div>
+      <div class="kpi-target">target <span>&gt;80%</span></div>
+    </div>
+    <div class="kpi-bar"><div class="kpi-bar-fill pending" style="width: 0%"></div></div>
+  </div>
+
+  <div class="kpi-card">
+    <div class="kpi-phase p1">Part 1</div>
+    <div class="kpi-name">Drill Completion Rate</div>
+    <div class="kpi-values">
+      <div class="kpi-actual pending" contenteditable="true" data-target="70">--</div>
+      <div class="kpi-target">target <span>&gt;70%</span></div>
+    </div>
+    <div class="kpi-bar"><div class="kpi-bar-fill pending" style="width: 0%"></div></div>
+  </div>
+
+  <div class="kpi-card">
+    <div class="kpi-phase gate">Gate</div>
+    <div class="kpi-name">Drill &rarr; Sign-Up Conversion</div>
+    <div class="kpi-values">
+      <div class="kpi-actual pending" contenteditable="true" data-target="30">--</div>
+      <div class="kpi-target">target <span>&gt;30%</span></div>
+    </div>
+    <div class="kpi-bar"><div class="kpi-bar-fill pending" style="width: 0%"></div></div>
+  </div>
+
+  <div class="kpi-card">
+    <div class="kpi-phase gate">Gate</div>
+    <div class="kpi-name">Path A Choice ("Import hands")</div>
+    <div class="kpi-values">
+      <div class="kpi-actual pending" contenteditable="true" data-target="30">--</div>
+      <div class="kpi-target">target <span>&gt;30%</span></div>
+    </div>
+    <div class="kpi-bar"><div class="kpi-bar-fill pending" style="width: 0%"></div></div>
+  </div>
+
+  <div class="kpi-card">
+    <div class="kpi-phase p2">Part 2</div>
+    <div class="kpi-name">Tracker Install Rate (Path A)</div>
+    <div class="kpi-values">
+      <div class="kpi-actual pending" contenteditable="true" data-target="60">--</div>
+      <div class="kpi-target">target <span>&gt;60%</span></div>
+    </div>
+    <div class="kpi-bar"><div class="kpi-bar-fill pending" style="width: 0%"></div></div>
+  </div>
+
+  <div class="kpi-card">
+    <div class="kpi-phase p2">Part 2</div>
+    <div class="kpi-name">First Real Report Generated</div>
+    <div class="kpi-values">
+      <div class="kpi-actual pending" contenteditable="true" data-target="40">--</div>
+      <div class="kpi-target">target <span>&gt;40%</span></div>
+    </div>
+    <div class="kpi-bar"><div class="kpi-bar-fill pending" style="width: 0%"></div></div>
+  </div>
+
+  <div class="kpi-card">
+    <div class="kpi-phase p3">Part 3</div>
+    <div class="kpi-name">Day 1 Return Rate</div>
+    <div class="kpi-values">
+      <div class="kpi-actual pending" contenteditable="true" data-target="40">--</div>
+      <div class="kpi-target">target <span>&gt;40%</span></div>
+    </div>
+    <div class="kpi-bar"><div class="kpi-bar-fill pending" style="width: 0%"></div></div>
+  </div>
+
+  <div class="kpi-card">
+    <div class="kpi-phase p3">Part 3</div>
+    <div class="kpi-name">Day 7 Retention</div>
+    <div class="kpi-values">
+      <div class="kpi-actual pending" contenteditable="true" data-target="30">--</div>
+      <div class="kpi-target">target <span>&gt;30%</span></div>
+    </div>
+    <div class="kpi-bar"><div class="kpi-bar-fill pending" style="width: 0%"></div></div>
+  </div>
+
+  <div class="kpi-card">
+    <div class="kpi-phase p4">Part 3+4</div>
+    <div class="kpi-name">Day 30 Retention</div>
+    <div class="kpi-values">
+      <div class="kpi-actual pending" contenteditable="true" data-target="15">--</div>
+      <div class="kpi-target">target <span>&gt;15%</span></div>
+    </div>
+    <div class="kpi-bar"><div class="kpi-bar-fill pending" style="width: 0%"></div></div>
+  </div>
+
+  <div class="kpi-card">
+    <div class="kpi-phase p2">Part 2+3</div>
+    <div class="kpi-name">Free &rarr; Paid Conversion</div>
+    <div class="kpi-values">
+      <div class="kpi-actual pending" contenteditable="true" data-target="5">--</div>
+      <div class="kpi-target">target <span>&gt;5%</span></div>
+    </div>
+    <div class="kpi-bar"><div class="kpi-bar-fill pending" style="width: 0%"></div></div>
+  </div>
+
+</div>
+
+<!-- A/B Tests -->
+<div class="section-title">Priority A/B Tests</div>
+<div class="tests-grid">
+  <div class="test-card">
+    <div class="test-num">1</div>
+    <div class="test-content">
+      <div class="test-name">10 vs 15 vs 20 spots</div>
+      <div class="test-measure">Completion rate vs quality of tendencies</div>
+    </div>
+    <div class="test-status planned">Planned</div>
+  </div>
+  <div class="test-card">
+    <div class="test-num">2</div>
+    <div class="test-content">
+      <div class="test-name">Gate: two options vs one</div>
+      <div class="test-measure">Sign-up rate and activation quality</div>
+    </div>
+    <div class="test-status planned">Planned</div>
+  </div>
+  <div class="test-card">
+    <div class="test-num">3</div>
+    <div class="test-content">
+      <div class="test-name">Result framing</div>
+      <div class="test-measure">Different copies by performance level</div>
+    </div>
+    <div class="test-status planned">Planned</div>
+  </div>
+  <div class="test-card">
+    <div class="test-num">4</div>
+    <div class="test-content">
+      <div class="test-name">Path B: tracker push timing</div>
+      <div class="test-measure">After X drills vs Y days</div>
+    </div>
+    <div class="test-status planned">Planned</div>
+  </div>
+  <div class="test-card">
+    <div class="test-num">5</div>
+    <div class="test-content">
+      <div class="test-name">Per-spot feedback</div>
+      <div class="test-measure">With/without reveal during drill</div>
+    </div>
+    <div class="test-status planned">Planned</div>
+  </div>
+  <div class="test-card">
+    <div class="test-num">6</div>
+    <div class="test-content">
+      <div class="test-name">High Stakes bypass</div>
+      <div class="test-measure">Skill check vs explore product</div>
+    </div>
+    <div class="test-status planned">Planned</div>
+  </div>
+</div>
+
+<!-- Open Decisions -->
+<div class="section-title">Open Decisions (Need Team Input)</div>
+<div class="decisions-list">
+  <div class="decision-card">
+    <div class="decision-icon">?</div>
+    <div>
+      <div class="decision-text">Does Tracker work on the free plan?</div>
+      <div class="decision-impact">Impacts Part 2 Path A viability</div>
+    </div>
+  </div>
+  <div class="decision-card">
+    <div class="decision-icon">?</div>
+    <div>
+      <div class="decision-text">Who curates pre-selected spots and how often?</div>
+      <div class="decision-impact">NLHE + PLO = two separate pools needed</div>
+    </div>
+  </div>
+  <div class="decision-card">
+    <div class="decision-icon">?</div>
+    <div>
+      <div class="decision-text">Email/notification infrastructure?</div>
+      <div class="decision-impact">Exists or needs to be built? Impacts Part 3+4</div>
+    </div>
+  </div>
+  <div class="decision-card">
+    <div class="decision-icon">?</div>
+    <div>
+      <div class="decision-text">Timeline for AI-full (Part 3 Phase 2)</div>
+      <div class="decision-impact">AI-lite ships first, full LLM later</div>
+    </div>
+  </div>
+  <div class="decision-card">
+    <div class="decision-icon">?</div>
+    <div>
+      <div class="decision-text">Features available for NLHE at launch?</div>
+      <div class="decision-impact">Same as PLO or subset?</div>
+    </div>
+  </div>
+  <div class="decision-card">
+    <div class="decision-icon">?</div>
+    <div>
+      <div class="decision-text">"Explore the product" flow for High Stakes</div>
+      <div class="decision-impact">What do experienced players see in bypass?</div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  <div class="footer-text">Last updated: February 2026 | Pre-launch tracking</div>
+  <div class="footer-logo">Flop<span>Hero</span></div>
+</div>
+
+<script>
+  // Make KPI values editable and update bars
+  document.querySelectorAll('.kpi-actual').forEach(el => {
+    el.addEventListener('blur', function() {
+      const val = parseFloat(this.textContent);
+      const target = parseFloat(this.dataset.target);
+      const bar = this.closest('.kpi-card').querySelector('.kpi-bar-fill');
+
+      if (isNaN(val) || this.textContent.trim() === '--') {
+        this.classList.add('pending');
+        this.classList.remove('has-value');
+        bar.className = 'kpi-bar-fill pending';
+        bar.style.width = '0%';
+        return;
+      }
+
+      this.classList.remove('pending');
+      this.textContent = val + '%';
+
+      const pct = Math.min((val / target) * 100, 100);
+      bar.style.width = pct + '%';
+
+      if (val >= target) {
+        bar.className = 'kpi-bar-fill good';
+      } else if (val >= target * 0.7) {
+        bar.className = 'kpi-bar-fill warning';
+      } else {
+        bar.className = 'kpi-bar-fill';
+        bar.style.background = 'var(--red)';
+      }
+    });
+
+    el.addEventListener('focus', function() {
+      if (this.textContent.trim() === '--') {
+        this.textContent = '';
+      } else {
+        this.textContent = this.textContent.replace('%', '');
+      }
+    });
+
+    el.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        this.blur();
+      }
+    });
+  });
+</script>
+</body>
+</html>

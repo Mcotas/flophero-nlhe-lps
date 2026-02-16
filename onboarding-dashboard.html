@@ -3,199 +3,389 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FlopHero Onboarding Dashboard</title>
+<title>FlopHero Onboarding Architecture</title>
 <style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --surface-2: #1a1a25;
+    --surface-3: #22222f;
+    --border: #2a2a3a;
+    --border-light: #3a3a4a;
+    --text: #e8e8f0;
+    --text-muted: #9898a8;
+    --text-dim: #6a6a7a;
+    --gold: #FFC107;
+    --gold-dim: rgba(255,193,7,0.15);
+    --gold-glow: rgba(255,193,7,0.3);
+    --green: #22c55e;
+    --green-dim: rgba(34,197,94,0.15);
+    --blue: #3b82f6;
+    --blue-dim: rgba(59,130,246,0.15);
+    --orange: #f59e0b;
+    --orange-dim: rgba(245,158,11,0.15);
+    --red: #ef4444;
+    --red-dim: rgba(239,68,68,0.15);
+    --purple: #a855f7;
+    --purple-dim: rgba(168,85,247,0.15);
+  }
+
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
-  :root {
-    --bg: #121212;
-    --surface: #1E1E1E;
-    --surface2: #2A2A2A;
-    --border: #333;
-    --text: #E0E0E0;
-    --text-dim: #999;
-    --accent: #FFC107;
-    --accent-dim: rgba(255, 193, 7, 0.15);
-    --green: #22C55E;
-    --green-dim: rgba(34, 197, 94, 0.15);
-    --red: #EF4444;
-    --red-dim: rgba(239, 68, 68, 0.15);
-    --blue: #3B82F6;
-    --blue-dim: rgba(59, 130, 246, 0.15);
-    --purple: #A855F7;
-    --purple-dim: rgba(168, 85, 247, 0.15);
-  }
-
   body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     background: var(--bg);
     color: var(--text);
-    padding: 24px;
-    min-height: 100vh;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
   }
 
-  .header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 32px;
-    padding-bottom: 20px;
+  /* ========== HERO ========== */
+  .hero {
+    position: relative;
+    overflow: hidden;
+    padding: 80px 0 50px;
+    background: linear-gradient(180deg, #0f0f18 0%, var(--bg) 100%);
     border-bottom: 1px solid var(--border);
   }
 
-  .header h1 {
-    font-size: 24px;
-    font-weight: 600;
-    color: #fff;
+  .hero-glow {
+    position: absolute;
+    top: -120px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 800px;
+    height: 400px;
+    background: radial-gradient(ellipse, rgba(255,193,7,0.08) 0%, transparent 70%);
+    pointer-events: none;
+    animation: heroGlow 6s ease-in-out infinite alternate;
   }
 
-  .header h1 span { color: var(--accent); }
-
-  .header .status {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 13px;
-    color: var(--text-dim);
+  @keyframes heroGlow {
+    0% { opacity: 0.6; transform: translateX(-50%) scale(1); }
+    100% { opacity: 1; transform: translateX(-50%) scale(1.15); }
   }
 
-  .header .status-dot {
-    width: 8px;
-    height: 8px;
+  .hero-particles {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .particle {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: var(--gold);
     border-radius: 50%;
-    background: var(--accent);
+    opacity: 0;
+    animation: particleFloat linear infinite;
   }
 
-  /* Flow Pipeline */
-  .pipeline {
-    display: flex;
-    gap: 4px;
-    margin-bottom: 32px;
-    overflow-x: auto;
+  @keyframes particleFloat {
+    0% { opacity: 0; transform: translateY(0) scale(0); }
+    10% { opacity: 0.6; transform: scale(1); }
+    90% { opacity: 0.3; }
+    100% { opacity: 0; transform: translateY(-300px) scale(0); }
   }
 
-  .pipeline-step {
-    flex: 1;
-    min-width: 130px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 14px 16px;
+  .hero-wave {
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 60px;
+    overflow: hidden;
+  }
+
+  .hero-wave svg {
+    position: absolute;
+    bottom: 0;
+    width: 200%;
+    height: 60px;
+    animation: waveShift 8s linear infinite;
+  }
+
+  @keyframes waveShift {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 2;
+    max-width: 900px;
+    margin: 0 auto;
+    text-align: center;
+    padding: 0 24px;
+  }
+
+  .hero-label {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 20px;
+    padding: 6px 16px;
+    background: var(--gold-dim);
+    border: 1px solid rgba(255,193,7,0.2);
+    border-radius: 20px;
+  }
+
+  .hero-title {
+    font-size: 48px;
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 8px;
+    letter-spacing: -1px;
+  }
+
+  .hero-title .accent {
+    color: var(--gold);
     position: relative;
   }
 
-  .pipeline-step.active { border-color: var(--accent); }
-
-  .pipeline-step .step-label {
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: var(--accent);
-    margin-bottom: 6px;
+  .hero-subtitle {
+    font-size: 18px;
+    color: var(--text-muted);
+    margin-bottom: 28px;
+    font-weight: 400;
   }
 
-  .pipeline-step .step-title {
-    font-size: 13px;
-    font-weight: 600;
-    color: #fff;
-    margin-bottom: 4px;
+  .hero-meta {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
   }
 
-  .pipeline-step .step-desc {
-    font-size: 11px;
-    color: var(--text-dim);
-    line-height: 1.4;
-  }
-
-  .pipeline-arrow {
+  .meta-item {
     display: flex;
     align-items: center;
-    color: var(--accent);
-    font-size: 18px;
-    flex-shrink: 0;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--text-muted);
   }
 
-  /* KPI Grid */
-  .section-title {
+  .meta-icon {
+    width: 16px;
+    height: 16px;
+    opacity: 0.6;
+  }
+
+  .meta-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 12px;
+    border-radius: 12px;
     font-size: 11px;
     font-weight: 700;
+    letter-spacing: 0.5px;
     text-transform: uppercase;
-    letter-spacing: 1.5px;
-    color: var(--accent);
-    margin-bottom: 16px;
-    margin-top: 8px;
   }
 
+  .badge-approved {
+    background: var(--green-dim);
+    color: var(--green);
+    border: 1px solid rgba(34,197,94,0.3);
+  }
+
+  .badge-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .hero-tags {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 32px;
+  }
+
+  .tag {
+    padding: 5px 14px;
+    border-radius: 16px;
+    font-size: 12px;
+    font-weight: 600;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    transition: all 0.2s;
+  }
+
+  .tag:hover { border-color: var(--gold); color: var(--gold); }
+
+  /* Phase navigation pills */
+  .phase-nav {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .phase-pill {
+    padding: 8px 18px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.25s;
+    text-decoration: none;
+  }
+
+  .phase-pill:hover {
+    background: var(--gold-dim);
+    border-color: var(--gold);
+    color: var(--gold);
+    transform: translateY(-1px);
+  }
+
+  /* ========== CONTAINER ========== */
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  section {
+    padding: 60px 0;
+  }
+
+  .section-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 8px;
+  }
+
+  .section-title {
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    letter-spacing: -0.5px;
+  }
+
+  .section-desc {
+    font-size: 15px;
+    color: var(--text-muted);
+    margin-bottom: 40px;
+    max-width: 600px;
+  }
+
+  /* ========== ARCHITECTURE TABLE ========== */
+  .arch-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    background: var(--surface);
+  }
+
+  .arch-table thead th {
+    background: var(--surface-2);
+    padding: 14px 20px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--gold);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .arch-table tbody td {
+    padding: 14px 20px;
+    font-size: 14px;
+    color: var(--text);
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+
+  .arch-table tbody tr:last-child td { border-bottom: none; }
+
+  .arch-table tbody tr:hover { background: var(--surface-2); }
+
+  .phase-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .phase-0 { background: var(--blue-dim); color: var(--blue); }
+  .phase-1 { background: var(--gold-dim); color: var(--gold); }
+  .phase-gate { background: var(--orange-dim); color: var(--orange); }
+  .phase-2a { background: var(--green-dim); color: var(--green); }
+  .phase-2b { background: var(--purple-dim); color: var(--purple); }
+  .phase-3 { background: rgba(6,182,212,0.15); color: #06b6d4; }
+  .phase-4 { background: var(--red-dim); color: var(--red); }
+
+  /* ========== KPI CARDS ========== */
   .kpi-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: 16px;
-    margin-bottom: 32px;
   }
 
   .kpi-card {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 10px;
+    border-radius: 12px;
     padding: 20px;
-    transition: border-color 0.2s;
+    transition: all 0.25s;
   }
 
-  .kpi-card:hover { border-color: var(--accent); }
-
-  .kpi-card .kpi-phase {
-    font-size: 10px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    padding: 2px 8px;
-    border-radius: 4px;
-    display: inline-block;
-    margin-bottom: 12px;
+  .kpi-card:hover {
+    border-color: var(--border-light);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
   }
 
-  .kpi-card .kpi-phase.p1 { color: var(--accent); background: var(--accent-dim); }
-  .kpi-card .kpi-phase.p2 { color: var(--blue); background: var(--blue-dim); }
-  .kpi-card .kpi-phase.p3 { color: var(--green); background: var(--green-dim); }
-  .kpi-card .kpi-phase.p4 { color: var(--purple); background: var(--purple-dim); }
-  .kpi-card .kpi-phase.gate { color: var(--red); background: var(--red-dim); }
+  .kpi-target {
+    font-size: 32px;
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
 
-  .kpi-card .kpi-name {
+  .kpi-name {
     font-size: 13px;
-    color: var(--text-dim);
-    margin-bottom: 8px;
+    color: var(--text-muted);
+    margin-bottom: 12px;
     line-height: 1.3;
   }
 
-  .kpi-card .kpi-values {
-    display: flex;
-    align-items: baseline;
-    gap: 12px;
-    margin-bottom: 12px;
+  .kpi-phase {
+    margin-bottom: 10px;
   }
 
-  .kpi-card .kpi-actual {
-    font-size: 32px;
-    font-weight: 700;
-    color: #fff;
-  }
-
-  .kpi-card .kpi-actual.pending {
-    color: var(--text-dim);
-    font-size: 24px;
-  }
-
-  .kpi-card .kpi-target {
-    font-size: 13px;
-    color: var(--text-dim);
-  }
-
-  .kpi-card .kpi-target span { color: var(--accent); }
-
-  .kpi-bar {
+  .kpi-bar-bg {
     height: 4px;
-    background: var(--surface2);
+    background: var(--surface-3);
     border-radius: 2px;
     overflow: hidden;
   }
@@ -203,476 +393,1254 @@
   .kpi-bar-fill {
     height: 100%;
     border-radius: 2px;
-    transition: width 0.5s ease;
+    transition: width 1.5s ease-out;
+    width: 0;
   }
 
-  .kpi-bar-fill.good { background: var(--green); }
-  .kpi-bar-fill.warning { background: var(--accent); }
-  .kpi-bar-fill.pending { background: var(--border); }
-
-  /* A/B Tests */
-  .tests-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 12px;
-    margin-bottom: 32px;
+  /* ========== FUNNEL ========== */
+  .funnel-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    max-width: 700px;
+    margin: 0 auto;
   }
 
-  .test-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 16px 20px;
+  .funnel-step {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 20px;
+    padding: 6px 0;
   }
 
-  .test-card .test-num {
-    width: 28px;
-    height: 28px;
-    border-radius: 6px;
-    background: var(--accent-dim);
-    color: var(--accent);
+  .funnel-label {
+    width: 140px;
+    text-align: right;
     font-size: 13px;
-    font-weight: 700;
+    color: var(--text-muted);
+    flex-shrink: 0;
+  }
+
+  .funnel-bar-container {
+    flex: 1;
+    position: relative;
+  }
+
+  .funnel-bar {
+    height: 40px;
+    border-radius: 6px;
     display: flex;
     align-items: center;
     justify-content: center;
-    flex-shrink: 0;
+    font-size: 14px;
+    font-weight: 700;
+    transition: width 1.5s ease-out;
+    width: 0;
+    position: relative;
+    overflow: hidden;
   }
 
-  .test-card .test-content { flex: 1; }
-
-  .test-card .test-name {
-    font-size: 13px;
-    font-weight: 600;
-    color: #fff;
-    margin-bottom: 2px;
+  .funnel-bar::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.05) 50%, transparent 100%);
   }
 
-  .test-card .test-measure {
-    font-size: 12px;
-    color: var(--text-dim);
+  .funnel-pct {
+    position: relative;
+    z-index: 1;
   }
 
-  .test-card .test-status {
+  .funnel-connector {
+    width: 2px;
+    height: 16px;
+    background: var(--border);
+    margin: 0 auto;
+    margin-left: 190px;
+  }
+
+  /* ========== JOURNEY TIMELINE ========== */
+  .journey {
+    position: relative;
+    padding-left: 60px;
+  }
+
+  .journey::before {
+    content: '';
+    position: absolute;
+    left: 24px;
+    top: 24px;
+    bottom: 24px;
+    width: 2px;
+    background: linear-gradient(180deg, var(--gold) 0%, var(--gold-dim) 50%, transparent 100%);
+  }
+
+  .journey-item {
+    position: relative;
+    margin-bottom: 16px;
+  }
+
+  .journey-node {
+    position: absolute;
+    left: -60px;
+    top: 18px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--surface);
+    border: 2px solid var(--gold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--gold);
+    z-index: 2;
+    transition: all 0.3s;
+  }
+
+  .journey-item.active .journey-node {
+    background: var(--gold);
+    color: var(--bg);
+    box-shadow: 0 0 20px var(--gold-glow);
+  }
+
+  .journey-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.3s;
+  }
+
+  .journey-card:hover {
+    border-color: var(--border-light);
+  }
+
+  .journey-header {
+    padding: 18px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.2s;
+  }
+
+  .journey-header:hover {
+    background: var(--surface-2);
+  }
+
+  .journey-header-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .journey-phase-label {
     font-size: 11px;
-    font-weight: 600;
+    font-weight: 700;
+    letter-spacing: 1px;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
-    padding: 4px 10px;
-    border-radius: 4px;
+    padding: 3px 10px;
+    border-radius: 6px;
+  }
+
+  .journey-title {
+    font-size: 16px;
+    font-weight: 700;
+  }
+
+  .journey-chevron {
+    width: 20px;
+    height: 20px;
+    color: var(--text-muted);
+    transition: transform 0.3s;
     flex-shrink: 0;
   }
 
-  .test-card .test-status.planned {
-    color: var(--text-dim);
-    background: var(--surface2);
+  .journey-item.active .journey-chevron {
+    transform: rotate(180deg);
   }
 
-  /* Decisions */
-  .decisions-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  .journey-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.5s ease-out;
+  }
+
+  .journey-item.active .journey-body {
+    max-height: 2000px;
+  }
+
+  .journey-content {
+    padding: 0 24px 24px;
+    border-top: 1px solid var(--border);
+  }
+
+  /* User flow steps */
+  .flow-section-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin: 20px 0 12px;
+  }
+
+  .flow-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .flow-step {
+    display: flex;
+    align-items: flex-start;
     gap: 12px;
-    margin-bottom: 32px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    background: var(--surface-2);
+    border-left: 3px solid var(--border);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .flow-step.step-action { border-left-color: var(--gold); }
+  .flow-step.step-option { border-left-color: var(--blue); }
+  .flow-step.step-outcome { border-left-color: var(--green); }
+  .flow-step.step-gate { border-left-color: var(--orange); }
+
+  .flow-step-icon {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 800;
+    margin-top: 1px;
+  }
+
+  .step-action .flow-step-icon { background: var(--gold-dim); color: var(--gold); }
+  .step-option .flow-step-icon { background: var(--blue-dim); color: var(--blue); }
+  .step-outcome .flow-step-icon { background: var(--green-dim); color: var(--green); }
+  .step-gate .flow-step-icon { background: var(--orange-dim); color: var(--orange); }
+
+  /* Design decision cards */
+  .decisions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+    margin-top: 12px;
   }
 
   .decision-card {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+  }
+
+  .decision-card-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--gold);
+    margin-bottom: 6px;
+  }
+
+  .decision-card-text {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  /* ========== PRINCIPLES GRID ========== */
+  .principles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 14px;
+  }
+
+  .principle-card {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-left: 3px solid var(--accent);
-    border-radius: 8px;
-    padding: 16px 20px;
+    border-radius: 10px;
+    padding: 18px;
+    transition: all 0.25s;
     display: flex;
-    gap: 14px;
     align-items: flex-start;
+    gap: 12px;
   }
 
-  .decision-card .decision-icon {
-    font-size: 16px;
-    color: var(--accent);
-    margin-top: 1px;
+  .principle-card:hover {
+    border-color: var(--gold);
+    transform: translateY(-2px);
+  }
+
+  .principle-icon {
     flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: var(--gold-dim);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    color: var(--gold);
   }
 
-  .decision-card .decision-text {
+  .principle-text {
     font-size: 13px;
     color: var(--text);
     line-height: 1.5;
   }
 
-  .decision-card .decision-impact {
-    font-size: 11px;
-    color: var(--text-dim);
-    margin-top: 4px;
+  /* ========== A/B TESTS GRID ========== */
+  .tests-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 14px;
   }
 
-  /* Footer */
-  .footer {
-    margin-top: 40px;
-    padding-top: 20px;
-    border-top: 1px solid var(--border);
+  .test-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
+    gap: 14px;
+    transition: all 0.25s;
   }
 
-  .footer .footer-text {
+  .test-card:hover {
+    border-color: var(--border-light);
+    transform: translateY(-1px);
+  }
+
+  .test-number {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: var(--gold-dim);
+    border: 1px solid rgba(255,193,7,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--gold);
+  }
+
+  .test-content { flex: 1; }
+
+  .test-title {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .test-desc {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+
+  /* ========== OPEN DECISIONS ========== */
+  .decisions-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .open-decision {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    transition: all 0.25s;
+  }
+
+  .open-decision:hover {
+    border-color: var(--orange);
+    transform: translateX(4px);
+  }
+
+  .od-number {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--orange-dim);
+    border: 1px solid rgba(245,158,11,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--orange);
+  }
+
+  .od-content { flex: 1; }
+
+  .od-question {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .od-impact {
+    font-size: 13px;
+    color: var(--orange);
+    font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    opacity: 0.8;
+  }
+
+  /* ========== FOOTER ========== */
+  .footer {
+    border-top: 1px solid var(--border);
+    padding: 32px 0;
+    text-align: center;
+  }
+
+  .footer-text {
+    font-size: 13px;
+    color: var(--text-dim);
+  }
+
+  .footer-text span { color: var(--gold); font-weight: 600; }
+
+  .footer-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
     font-size: 12px;
     color: var(--text-dim);
   }
 
-  .footer .footer-logo {
-    font-size: 14px;
-    font-weight: 700;
-    color: #fff;
+  .footer-status .badge-dot {
+    width: 5px;
+    height: 5px;
   }
 
-  .footer .footer-logo span { color: var(--accent); }
-
-  /* Editable values */
-  .editable {
-    cursor: pointer;
-    border-bottom: 1px dashed var(--border);
-    transition: border-color 0.2s;
+  /* ========== SECTION DIVIDER ========== */
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+    margin: 0;
   }
 
-  .editable:hover { border-color: var(--accent); }
-
-  .note {
-    font-size: 11px;
-    color: var(--text-dim);
-    margin-bottom: 24px;
-    padding: 10px 14px;
-    background: var(--surface);
-    border-radius: 6px;
-    border: 1px solid var(--border);
+  /* ========== ANIMATIONS ========== */
+  .fade-in {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
   }
 
+  .fade-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ========== RESPONSIVE ========== */
   @media (max-width: 768px) {
-    body { padding: 16px; }
-    .kpi-grid { grid-template-columns: 1fr 1fr; }
+    .hero { padding: 50px 0 40px; }
+    .hero-title { font-size: 32px; }
+    .hero-subtitle { font-size: 15px; }
+    .hero-meta { gap: 12px; }
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .funnel-label { width: 100px; font-size: 11px; }
+    .journey { padding-left: 50px; }
+    .journey::before { left: 19px; }
+    .journey-node { left: -50px; width: 38px; height: 38px; font-size: 13px; }
+    .decisions-grid { grid-template-columns: 1fr; }
+    .principles-grid { grid-template-columns: repeat(2, 1fr); }
     .tests-grid { grid-template-columns: 1fr; }
-    .decisions-list { grid-template-columns: 1fr; }
-    .pipeline { flex-direction: column; }
-    .pipeline-arrow { transform: rotate(90deg); justify-content: center; }
+    .section-title { font-size: 26px; }
+  }
+
+  @media (max-width: 480px) {
+    .kpi-grid { grid-template-columns: 1fr; }
+    .principles-grid { grid-template-columns: 1fr; }
+    .hero-title { font-size: 26px; }
+    .funnel-step { gap: 10px; }
+    .funnel-label { width: 80px; font-size: 10px; }
   }
 </style>
 </head>
 <body>
 
-<div class="header">
-  <h1>Onboarding <span>Dashboard</span></h1>
-  <div class="status">
-    <div class="status-dot"></div>
-    Pre-launch (targets only)
-  </div>
-</div>
+<!-- ==================== HERO ==================== -->
+<div class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-particles" id="particles"></div>
 
-<div class="note">
-  KPI values will be populated after launch. Click any "--" value to manually enter data. Targets based on PLG SaaS benchmarks.
-</div>
-
-<!-- Architecture Flow -->
-<div class="section-title">Architecture Flow</div>
-<div class="pipeline">
-  <div class="pipeline-step active">
-    <div class="step-label">Part 0</div>
-    <div class="step-title">Landing</div>
-    <div class="step-desc">5-min skill check CTA. Game via landing page.</div>
-  </div>
-  <div class="pipeline-arrow">&rarr;</div>
-  <div class="pipeline-step">
-    <div class="step-label">Part 1</div>
-    <div class="step-title">Skill Check</div>
-    <div class="step-desc">15 spots, test+reveal, honest tendencies.</div>
-  </div>
-  <div class="pipeline-arrow">&rarr;</div>
-  <div class="pipeline-step">
-    <div class="step-label">Gate</div>
-    <div class="step-title">Sign-Up</div>
-    <div class="step-desc">Import hands vs Keep training.</div>
-  </div>
-  <div class="pipeline-arrow">&rarr;</div>
-  <div class="pipeline-step">
-    <div class="step-label">Part 2</div>
-    <div class="step-title">Activation</div>
-    <div class="step-desc">Path A: Real product. Path B: More drills.</div>
-  </div>
-  <div class="pipeline-arrow">&rarr;</div>
-  <div class="pipeline-step">
-    <div class="step-label">Part 3</div>
-    <div class="step-title">Retention</div>
-    <div class="step-desc">Day 1, 3, 7 onboarding + bitsize drills.</div>
-  </div>
-  <div class="pipeline-arrow">&rarr;</div>
-  <div class="pipeline-step">
-    <div class="step-label">Part 4</div>
-    <div class="step-title">Lifecycle</div>
-    <div class="step-desc">Re-engagement triggers + milestones.</div>
-  </div>
-</div>
-
-<!-- KPIs -->
-<div class="section-title">Key Performance Indicators</div>
-<div class="kpi-grid">
-
-  <div class="kpi-card">
-    <div class="kpi-phase p1">Part 1</div>
-    <div class="kpi-name">Drill Start Rate</div>
-    <div class="kpi-values">
-      <div class="kpi-actual pending" contenteditable="true" data-target="80">--</div>
-      <div class="kpi-target">target <span>&gt;80%</span></div>
-    </div>
-    <div class="kpi-bar"><div class="kpi-bar-fill pending" style="width: 0%"></div></div>
+  <div class="hero-wave">
+    <svg viewBox="0 0 2400 60" preserveAspectRatio="none">
+      <path d="M0,30 Q300,0 600,30 T1200,30 T1800,30 T2400,30 L2400,60 L0,60 Z" fill="rgba(255,193,7,0.04)"/>
+      <path d="M0,35 Q300,10 600,35 T1200,35 T1800,35 T2400,35 L2400,60 L0,60 Z" fill="rgba(255,193,7,0.02)"/>
+    </svg>
   </div>
 
-  <div class="kpi-card">
-    <div class="kpi-phase p1">Part 1</div>
-    <div class="kpi-name">Drill Completion Rate</div>
-    <div class="kpi-values">
-      <div class="kpi-actual pending" contenteditable="true" data-target="70">--</div>
-      <div class="kpi-target">target <span>&gt;70%</span></div>
-    </div>
-    <div class="kpi-bar"><div class="kpi-bar-fill pending" style="width: 0%"></div></div>
-  </div>
+  <div class="hero-content">
+    <div class="hero-label">Product Design Document</div>
+    <h1 class="hero-title">Onboarding <span class="accent">Architecture</span></h1>
+    <p class="hero-subtitle">Reducing churn and improving new user activation through a value-first approach</p>
 
-  <div class="kpi-card">
-    <div class="kpi-phase gate">Gate</div>
-    <div class="kpi-name">Drill &rarr; Sign-Up Conversion</div>
-    <div class="kpi-values">
-      <div class="kpi-actual pending" contenteditable="true" data-target="30">--</div>
-      <div class="kpi-target">target <span>&gt;30%</span></div>
+    <div class="hero-meta">
+      <span class="meta-item">
+        <svg class="meta-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M5.75.75A.75.75 0 016.5 0h3a.75.75 0 010 1.5h-3A.75.75 0 015.75.75zM8 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM1 9a7 7 0 1114 0A7 7 0 011 9zm7.25-3.25v2.992l2.028.812a.75.75 0 01-.557 1.392l-2.5-1A.75.75 0 017 9.25v-3.5a.75.75 0 011.5 0z"/></svg>
+        February 2026
+      </span>
+      <span class="meta-item">
+        <svg class="meta-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M10.561 8.073a6.005 6.005 0 013.432 5.142.75.75 0 11-1.498.07 4.5 4.5 0 00-8.99 0 .75.75 0 11-1.498-.07 6.004 6.004 0 013.431-5.142 3.999 3.999 0 115.123 0zM10.5 5a2.5 2.5 0 10-5 0 2.5 2.5 0 005 0z"/></svg>
+        Marco Cotas + Claude
+      </span>
+      <span class="meta-item">
+        <svg class="meta-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M2 1.75C2 .784 2.784 0 3.75 0h8.5C13.216 0 14 .784 14 1.75v12.5A1.75 1.75 0 0112.25 16H3.75A1.75 1.75 0 012 14.25zm1.75-.25a.25.25 0 00-.25.25v12.5c0 .138.112.25.25.25h8.5a.25.25 0 00.25-.25V1.75a.25.25 0 00-.25-.25z"/></svg>
+        Internal Document
+      </span>
+      <span class="meta-badge badge-approved">
+        <span class="badge-dot"></span>
+        Approved
+      </span>
     </div>
-    <div class="kpi-bar"><div class="kpi-bar-fill pending" style="width: 0%"></div></div>
-  </div>
 
-  <div class="kpi-card">
-    <div class="kpi-phase gate">Gate</div>
-    <div class="kpi-name">Path A Choice ("Import hands")</div>
-    <div class="kpi-values">
-      <div class="kpi-actual pending" contenteditable="true" data-target="30">--</div>
-      <div class="kpi-target">target <span>&gt;30%</span></div>
+    <div class="hero-tags">
+      <span class="tag">Multi-game (NLHE + PLO)</span>
+      <span class="tag">Value-first</span>
+      <span class="tag">Trial before sign-up</span>
+      <span class="tag">Reference: Duolingo / Canva</span>
     </div>
-    <div class="kpi-bar"><div class="kpi-bar-fill pending" style="width: 0%"></div></div>
-  </div>
 
-  <div class="kpi-card">
-    <div class="kpi-phase p2">Part 2</div>
-    <div class="kpi-name">Tracker Install Rate (Path A)</div>
-    <div class="kpi-values">
-      <div class="kpi-actual pending" contenteditable="true" data-target="60">--</div>
-      <div class="kpi-target">target <span>&gt;60%</span></div>
-    </div>
-    <div class="kpi-bar"><div class="kpi-bar-fill pending" style="width: 0%"></div></div>
-  </div>
-
-  <div class="kpi-card">
-    <div class="kpi-phase p2">Part 2</div>
-    <div class="kpi-name">First Real Report Generated</div>
-    <div class="kpi-values">
-      <div class="kpi-actual pending" contenteditable="true" data-target="40">--</div>
-      <div class="kpi-target">target <span>&gt;40%</span></div>
-    </div>
-    <div class="kpi-bar"><div class="kpi-bar-fill pending" style="width: 0%"></div></div>
-  </div>
-
-  <div class="kpi-card">
-    <div class="kpi-phase p3">Part 3</div>
-    <div class="kpi-name">Day 1 Return Rate</div>
-    <div class="kpi-values">
-      <div class="kpi-actual pending" contenteditable="true" data-target="40">--</div>
-      <div class="kpi-target">target <span>&gt;40%</span></div>
-    </div>
-    <div class="kpi-bar"><div class="kpi-bar-fill pending" style="width: 0%"></div></div>
-  </div>
-
-  <div class="kpi-card">
-    <div class="kpi-phase p3">Part 3</div>
-    <div class="kpi-name">Day 7 Retention</div>
-    <div class="kpi-values">
-      <div class="kpi-actual pending" contenteditable="true" data-target="30">--</div>
-      <div class="kpi-target">target <span>&gt;30%</span></div>
-    </div>
-    <div class="kpi-bar"><div class="kpi-bar-fill pending" style="width: 0%"></div></div>
-  </div>
-
-  <div class="kpi-card">
-    <div class="kpi-phase p4">Part 3+4</div>
-    <div class="kpi-name">Day 30 Retention</div>
-    <div class="kpi-values">
-      <div class="kpi-actual pending" contenteditable="true" data-target="15">--</div>
-      <div class="kpi-target">target <span>&gt;15%</span></div>
-    </div>
-    <div class="kpi-bar"><div class="kpi-bar-fill pending" style="width: 0%"></div></div>
-  </div>
-
-  <div class="kpi-card">
-    <div class="kpi-phase p2">Part 2+3</div>
-    <div class="kpi-name">Free &rarr; Paid Conversion</div>
-    <div class="kpi-values">
-      <div class="kpi-actual pending" contenteditable="true" data-target="5">--</div>
-      <div class="kpi-target">target <span>&gt;5%</span></div>
-    </div>
-    <div class="kpi-bar"><div class="kpi-bar-fill pending" style="width: 0%"></div></div>
-  </div>
-
-</div>
-
-<!-- A/B Tests -->
-<div class="section-title">Priority A/B Tests</div>
-<div class="tests-grid">
-  <div class="test-card">
-    <div class="test-num">1</div>
-    <div class="test-content">
-      <div class="test-name">10 vs 15 vs 20 spots</div>
-      <div class="test-measure">Completion rate vs quality of tendencies</div>
-    </div>
-    <div class="test-status planned">Planned</div>
-  </div>
-  <div class="test-card">
-    <div class="test-num">2</div>
-    <div class="test-content">
-      <div class="test-name">Gate: two options vs one</div>
-      <div class="test-measure">Sign-up rate and activation quality</div>
-    </div>
-    <div class="test-status planned">Planned</div>
-  </div>
-  <div class="test-card">
-    <div class="test-num">3</div>
-    <div class="test-content">
-      <div class="test-name">Result framing</div>
-      <div class="test-measure">Different copies by performance level</div>
-    </div>
-    <div class="test-status planned">Planned</div>
-  </div>
-  <div class="test-card">
-    <div class="test-num">4</div>
-    <div class="test-content">
-      <div class="test-name">Path B: tracker push timing</div>
-      <div class="test-measure">After X drills vs Y days</div>
-    </div>
-    <div class="test-status planned">Planned</div>
-  </div>
-  <div class="test-card">
-    <div class="test-num">5</div>
-    <div class="test-content">
-      <div class="test-name">Per-spot feedback</div>
-      <div class="test-measure">With/without reveal during drill</div>
-    </div>
-    <div class="test-status planned">Planned</div>
-  </div>
-  <div class="test-card">
-    <div class="test-num">6</div>
-    <div class="test-content">
-      <div class="test-name">High Stakes bypass</div>
-      <div class="test-measure">Skill check vs explore product</div>
-    </div>
-    <div class="test-status planned">Planned</div>
-  </div>
-</div>
-
-<!-- Open Decisions -->
-<div class="section-title">Open Decisions (Need Team Input)</div>
-<div class="decisions-list">
-  <div class="decision-card">
-    <div class="decision-icon">?</div>
-    <div>
-      <div class="decision-text">Does Tracker work on the free plan?</div>
-      <div class="decision-impact">Impacts Part 2 Path A viability</div>
-    </div>
-  </div>
-  <div class="decision-card">
-    <div class="decision-icon">?</div>
-    <div>
-      <div class="decision-text">Who curates pre-selected spots and how often?</div>
-      <div class="decision-impact">NLHE + PLO = two separate pools needed</div>
-    </div>
-  </div>
-  <div class="decision-card">
-    <div class="decision-icon">?</div>
-    <div>
-      <div class="decision-text">Email/notification infrastructure?</div>
-      <div class="decision-impact">Exists or needs to be built? Impacts Part 3+4</div>
-    </div>
-  </div>
-  <div class="decision-card">
-    <div class="decision-icon">?</div>
-    <div>
-      <div class="decision-text">Timeline for AI-full (Part 3 Phase 2)</div>
-      <div class="decision-impact">AI-lite ships first, full LLM later</div>
-    </div>
-  </div>
-  <div class="decision-card">
-    <div class="decision-icon">?</div>
-    <div>
-      <div class="decision-text">Features available for NLHE at launch?</div>
-      <div class="decision-impact">Same as PLO or subset?</div>
-    </div>
-  </div>
-  <div class="decision-card">
-    <div class="decision-icon">?</div>
-    <div>
-      <div class="decision-text">"Explore the product" flow for High Stakes</div>
-      <div class="decision-impact">What do experienced players see in bypass?</div>
+    <div class="phase-nav">
+      <a class="phase-pill" href="#overview">Overview</a>
+      <a class="phase-pill" href="#kpis">KPIs</a>
+      <a class="phase-pill" href="#funnel">Funnel</a>
+      <a class="phase-pill" href="#journey">Journey</a>
+      <a class="phase-pill" href="#principles">Principles</a>
+      <a class="phase-pill" href="#tests">A/B Tests</a>
+      <a class="phase-pill" href="#decisions">Decisions</a>
     </div>
   </div>
 </div>
 
-<div class="footer">
-  <div class="footer-text">Last updated: February 2026 | Pre-launch tracking</div>
-  <div class="footer-logo">Flop<span>Hero</span></div>
-</div>
+<!-- ==================== ARCHITECTURE OVERVIEW ==================== -->
+<section id="overview">
+  <div class="container fade-in">
+    <div class="section-label">Overview</div>
+    <div class="section-title">Complete Architecture</div>
+    <div class="section-desc">7 phases from first contact to long-term retention. Each phase has a clear goal and measurable gate.</div>
 
+    <table class="arch-table">
+      <thead>
+        <tr>
+          <th>Phase</th>
+          <th>Goal</th>
+          <th>Gate / Trigger</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="phase-badge phase-0">Part 0</span></td>
+          <td>Align expectations (landing)</td>
+          <td>CTA: "5-min skill check". Game via landing or choice</td>
+        </tr>
+        <tr>
+          <td><span class="phase-badge phase-1">Part 1</span></td>
+          <td>First experience, no sign-up</td>
+          <td>Stakes > 15 spots (test+reveal) > honest tendencies</td>
+        </tr>
+        <tr>
+          <td><span class="phase-badge phase-gate">Gate</span></td>
+          <td>Sign-up with intent</td>
+          <td>"Import hands" vs "Keep training"</td>
+        </tr>
+        <tr>
+          <td><span class="phase-badge phase-2a">Part 2A</span></td>
+          <td>Real product (import)</td>
+          <td>Guided tracker setup > 1st real report</td>
+        </tr>
+        <tr>
+          <td><span class="phase-badge phase-2b">Part 2B</span></td>
+          <td>Exploration (drills)</td>
+          <td>More drills > gradual push to tracker</td>
+        </tr>
+        <tr>
+          <td><span class="phase-badge phase-3">Part 3</span></td>
+          <td>Progressive onboarding</td>
+          <td>Day 1, 3, 7 + bitsize drills</td>
+        </tr>
+        <tr>
+          <td><span class="phase-badge phase-4">Part 4</span></td>
+          <td>Lifecycle / Re-engagement</td>
+          <td>Inactivity triggers + milestones</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ==================== KPI TARGETS ==================== -->
+<section id="kpis">
+  <div class="container fade-in">
+    <div class="section-label">Metrics</div>
+    <div class="section-title">KPI Targets</div>
+    <div class="section-desc">Key metrics to track across each phase of the onboarding funnel.</div>
+
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-target" style="color: var(--gold);">&gt;80%</div>
+        <div class="kpi-name">Drill Start Rate</div>
+        <div class="kpi-phase"><span class="phase-badge phase-1">Part 1</span></div>
+        <div class="kpi-bar-bg"><div class="kpi-bar-fill" data-width="80" style="background: var(--gold);"></div></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-target" style="color: var(--gold);">&gt;70%</div>
+        <div class="kpi-name">Drill Completion Rate</div>
+        <div class="kpi-phase"><span class="phase-badge phase-1">Part 1</span></div>
+        <div class="kpi-bar-bg"><div class="kpi-bar-fill" data-width="70" style="background: var(--gold);"></div></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-target" style="color: var(--green);">&gt;30%</div>
+        <div class="kpi-name">Drill > Sign-up Conversion</div>
+        <div class="kpi-phase"><span class="phase-badge phase-gate">Part 1-2</span></div>
+        <div class="kpi-bar-bg"><div class="kpi-bar-fill" data-width="30" style="background: var(--green);"></div></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-target" style="color: var(--orange);">&gt;30%</div>
+        <div class="kpi-name">Path A Choice ("Import")</div>
+        <div class="kpi-phase"><span class="phase-badge phase-gate">Gate</span></div>
+        <div class="kpi-bar-bg"><div class="kpi-bar-fill" data-width="30" style="background: var(--orange);"></div></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-target" style="color: var(--green);">&gt;60%</div>
+        <div class="kpi-name">Tracker Install Rate (Path A)</div>
+        <div class="kpi-phase"><span class="phase-badge phase-2a">Part 2</span></div>
+        <div class="kpi-bar-bg"><div class="kpi-bar-fill" data-width="60" style="background: var(--green);"></div></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-target" style="color: var(--blue);">&gt;40%</div>
+        <div class="kpi-name">First Real Report Generated</div>
+        <div class="kpi-phase"><span class="phase-badge phase-2a">Part 2</span></div>
+        <div class="kpi-bar-bg"><div class="kpi-bar-fill" data-width="40" style="background: var(--blue);"></div></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-target" style="color: #06b6d4;">&gt;40%</div>
+        <div class="kpi-name">Day 1 Return Rate</div>
+        <div class="kpi-phase"><span class="phase-badge phase-3">Part 3</span></div>
+        <div class="kpi-bar-bg"><div class="kpi-bar-fill" data-width="40" style="background: #06b6d4;"></div></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-target" style="color: #06b6d4;">&gt;30%</div>
+        <div class="kpi-name">Day 7 Retention</div>
+        <div class="kpi-phase"><span class="phase-badge phase-3">Part 3</span></div>
+        <div class="kpi-bar-bg"><div class="kpi-bar-fill" data-width="30" style="background: #06b6d4;"></div></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-target" style="color: var(--purple);">&gt;15%</div>
+        <div class="kpi-name">Day 30 Retention</div>
+        <div class="kpi-phase"><span class="phase-badge phase-3">Part 3+4</span></div>
+        <div class="kpi-bar-bg"><div class="kpi-bar-fill" data-width="15" style="background: var(--purple);"></div></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-target" style="color: var(--green);">&gt;5%</div>
+        <div class="kpi-name">Free > Paid Conversion</div>
+        <div class="kpi-phase"><span class="phase-badge phase-2a">Part 2+3</span></div>
+        <div class="kpi-bar-bg"><div class="kpi-bar-fill" data-width="5" style="background: var(--green);"></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ==================== CONVERSION FUNNEL ==================== -->
+<section id="funnel">
+  <div class="container fade-in">
+    <div class="section-label">Projections</div>
+    <div class="section-title">Conversion Funnel</div>
+    <div class="section-desc">Projected conversion rates through the complete onboarding pipeline.</div>
+
+    <div class="funnel-container">
+      <div class="funnel-step">
+        <div class="funnel-label">Arrive at Landing</div>
+        <div class="funnel-bar-container">
+          <div class="funnel-bar" data-width="100" style="background: linear-gradient(90deg, var(--gold), #e6ac00);">
+            <span class="funnel-pct">100%</span>
+          </div>
+        </div>
+      </div>
+      <div class="funnel-connector"></div>
+      <div class="funnel-step">
+        <div class="funnel-label">Start Drill</div>
+        <div class="funnel-bar-container">
+          <div class="funnel-bar" data-width="80" style="background: linear-gradient(90deg, #e6ac00, #cc9900);">
+            <span class="funnel-pct">80%</span>
+          </div>
+        </div>
+      </div>
+      <div class="funnel-connector"></div>
+      <div class="funnel-step">
+        <div class="funnel-label">Complete Drill</div>
+        <div class="funnel-bar-container">
+          <div class="funnel-bar" data-width="56" style="background: linear-gradient(90deg, #cc9900, #b38600);">
+            <span class="funnel-pct">56%</span>
+          </div>
+        </div>
+      </div>
+      <div class="funnel-connector"></div>
+      <div class="funnel-step">
+        <div class="funnel-label">Sign Up</div>
+        <div class="funnel-bar-container">
+          <div class="funnel-bar" data-width="17" style="background: linear-gradient(90deg, #b38600, #8a6800); border: 1px solid rgba(255,193,7,0.3);">
+            <span class="funnel-pct">17%</span>
+          </div>
+        </div>
+      </div>
+      <div class="funnel-connector"></div>
+      <div class="funnel-step">
+        <div class="funnel-label">Day 7 Active</div>
+        <div class="funnel-bar-container">
+          <div class="funnel-bar" data-width="5" style="background: transparent; border: 1px solid rgba(255,193,7,0.4);">
+            <span class="funnel-pct" style="color: var(--gold);">5%</span>
+          </div>
+        </div>
+      </div>
+      <div class="funnel-connector"></div>
+      <div class="funnel-step">
+        <div class="funnel-label">Paid</div>
+        <div class="funnel-bar-container">
+          <div class="funnel-bar" data-width="1" style="background: transparent; border: 1px solid rgba(255,193,7,0.3); min-width: 50px;">
+            <span class="funnel-pct" style="color: var(--gold);">~1%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ==================== THE JOURNEY ==================== -->
+<section id="journey">
+  <div class="container fade-in">
+    <div class="section-label">The Journey</div>
+    <div class="section-title">Phase-by-Phase Breakdown</div>
+    <div class="section-desc">Click each phase to expand details, user flows, and design decisions.</div>
+
+    <div class="journey">
+
+      <!-- PART 0 -->
+      <div class="journey-item" data-phase="0">
+        <div class="journey-node">0</div>
+        <div class="journey-card">
+          <div class="journey-header" onclick="toggleJourney(this)">
+            <div class="journey-header-left">
+              <span class="journey-phase-label phase-0">Part 0</span>
+              <span class="journey-title">Landing / First Contact</span>
+            </div>
+            <svg class="journey-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg>
+          </div>
+          <div class="journey-body">
+            <div class="journey-content">
+              <div class="flow-section-title">User Flow</div>
+              <div class="flow-steps">
+                <div class="flow-step step-action"><div class="flow-step-icon">1</div><div>User sees ad/landing page. Copy focused on the solution: "Improve your game" (not "GTO Solver")</div></div>
+                <div class="flow-step step-action"><div class="flow-step-icon">2</div><div>Single CTA: "5-minute skill check for [NLHE/PLO] players"</div></div>
+                <div class="flow-step step-option"><div class="flow-step-icon">?</div><div>Zero mention of sign-up. Promise: know where you stand, free, right now</div></div>
+                <div class="flow-step step-gate"><div class="flow-step-icon">!</div><div>Game selection: via landing (NLHE ad > NLHE flow) or via app ("What do you play?" [NLHE] [PLO])</div></div>
+              </div>
+              <div class="flow-section-title">Design Decisions</div>
+              <div class="decisions-grid">
+                <div class="decision-card">
+                  <div class="decision-card-title">Mobile-first</div>
+                  <div class="decision-card-text">The initial drill (Part 1) must work perfectly on mobile. Most users will arrive from mobile ads.</div>
+                </div>
+                <div class="decision-card">
+                  <div class="decision-card-title">Message Alignment</div>
+                  <div class="decision-card-text">If the ad says "GTO Solver" and onboarding says "test your level", there's dissonance. Part 0 aligns the message with the experience.</div>
+                </div>
+                <div class="decision-card">
+                  <div class="decision-card-title">One Choice Only</div>
+                  <div class="decision-card-text">Users from ads get the game pre-selected. Only organic/direct traffic users make a game choice. No "Both" option.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PART 1 -->
+      <div class="journey-item active" data-phase="1">
+        <div class="journey-node">1</div>
+        <div class="journey-card">
+          <div class="journey-header" onclick="toggleJourney(this)">
+            <div class="journey-header-left">
+              <span class="journey-phase-label phase-1">Part 1</span>
+              <span class="journey-title">First Experience (No Sign-Up)</span>
+            </div>
+            <svg class="journey-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg>
+          </div>
+          <div class="journey-body">
+            <div class="journey-content">
+              <div class="flow-section-title">User Flow</div>
+              <div class="flow-steps">
+                <div class="flow-step step-option"><div class="flow-step-icon">?</div><div>"What stakes do you play?" [Low] [Medium] [High]</div></div>
+                <div class="flow-step step-option"><div class="flow-step-icon">?</div><div>High Stakes only: "Quick skill check" vs "Explore the product" (bypass for experienced players)</div></div>
+                <div class="flow-step step-action"><div class="flow-step-icon">3</div><div>START button (no countdown, clean and professional). "We picked 15 spots for your level."</div></div>
+                <div class="flow-step step-action"><div class="flow-step-icon">4</div><div>15 pre-selected single-street spots in test mode (frequencies hidden during decision)</div></div>
+                <div class="flow-step step-outcome"><div class="flow-step-icon">5</div><div>After each spot: REVEAL with GTO comparison + brief explanation</div></div>
+                <div class="flow-step step-outcome"><div class="flow-step-icon">6</div><div>100% complete: HONEST RESULTS (accuracy, tendencies, breakdown by spot type)</div></div>
+                <div class="flow-step step-action"><div class="flow-step-icon">7</div><div>BRIDGE: "This was a sample. For a complete analysis of YOUR actual game:"</div></div>
+                <div class="flow-step step-gate"><div class="flow-step-icon">!</div><div>GATE: "Import your hands" (Path A) vs "Keep training" (Path B) + Sign Up</div></div>
+              </div>
+              <div class="flow-section-title">Design Decisions</div>
+              <div class="decisions-grid">
+                <div class="decision-card">
+                  <div class="decision-card-title">Test Mode with Reveal</div>
+                  <div class="decision-card-text">Frequencies hidden during decision, revealed after. Creates suspense, honest testing, and learning moments. Showing frequencies would make it training, not testing.</div>
+                </div>
+                <div class="decision-card">
+                  <div class="decision-card-title">15 Single-Street Spots</div>
+                  <div class="decision-card-text">~20 sec each, ~5 min total. Enough for tendencies (not precise leaks), short enough to maintain engagement. Exact number is A/B testable (10 vs 15 vs 20).</div>
+                </div>
+                <div class="decision-card">
+                  <div class="decision-card-title">Honest Results</div>
+                  <div class="decision-card-text">Poker players think in sample sizes. "3 leaks from 15 spots" kills credibility. Instead: observable tendencies + "This was a sample." Builds trust.</div>
+                </div>
+                <div class="decision-card">
+                  <div class="decision-card-title">Breakdown by Spot Type</div>
+                  <div class="decision-card-text">NOT by street. With 15 spots across streets, "River accuracy: 33%" is meaningless. Spot type grouping (3bet, single raised, multiway) is more useful and honest.</div>
+                </div>
+                <div class="decision-card">
+                  <div class="decision-card-title">Gate with Two Options</div>
+                  <div class="decision-card-text">User self-selects intent at sign-up: "Import hands" = advanced/motivated, "Keep training" = exploratory. Both sign up, but with different intents for Part 2.</div>
+                </div>
+                <div class="decision-card">
+                  <div class="decision-card-title">Adaptive Framing</div>
+                  <div class="decision-card-text">High score: "edges that separate good from elite." Medium: "patterns worth exploring." Low: "highest-impact improvement areas." Never punitive, always aspirational.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PART 2A -->
+      <div class="journey-item" data-phase="2a">
+        <div class="journey-node">2A</div>
+        <div class="journey-card">
+          <div class="journey-header" onclick="toggleJourney(this)">
+            <div class="journey-header-left">
+              <span class="journey-phase-label phase-2a">Part 2A</span>
+              <span class="journey-title">Real Product (Import Hands)</span>
+            </div>
+            <svg class="journey-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg>
+          </div>
+          <div class="journey-body">
+            <div class="journey-content">
+              <div class="flow-section-title">User Flow</div>
+              <div class="flow-steps">
+                <div class="flow-step step-action"><div class="flow-step-icon">1</div><div>Guided Tracker setup: download and install</div></div>
+                <div class="flow-step step-action"><div class="flow-step-icon">2</div><div>Play 1 short session with Tracker running</div></div>
+                <div class="flow-step step-outcome"><div class="flow-step-icon">3</div><div>"Your first real report is ready" - aha moment with the user's actual data</div></div>
+                <div class="flow-step step-outcome"><div class="flow-step-icon">4</div><div>Continues in product: Replayer, Reports, Library</div></div>
+              </div>
+              <div class="flow-section-title">Design Decisions</div>
+              <div class="decisions-grid">
+                <div class="decision-card">
+                  <div class="decision-card-title">Highest-Value Path</div>
+                  <div class="decision-card-text">Real hands + real report = strongest "aha moment". Much stronger than any pre-selected drill. Goal: get to real report as fast as possible.</div>
+                </div>
+                <div class="decision-card">
+                  <div class="decision-card-title">Tracker on Free Plan</div>
+                  <div class="decision-card-text">Path A only works if Tracker works on free (even limited to 10 hands/day). Decision needed: if not free, Path A must lead to upgrade + tracker.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PART 2B -->
+      <div class="journey-item" data-phase="2b">
+        <div class="journey-node">2B</div>
+        <div class="journey-card">
+          <div class="journey-header" onclick="toggleJourney(this)">
+            <div class="journey-header-left">
+              <span class="journey-phase-label phase-2b">Part 2B</span>
+              <span class="journey-title">Exploration (More Drills)</span>
+            </div>
+            <svg class="journey-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg>
+          </div>
+          <div class="journey-body">
+            <div class="journey-content">
+              <div class="flow-section-title">User Flow</div>
+              <div class="flow-steps">
+                <div class="flow-step step-action"><div class="flow-step-icon">1</div><div>Drills focused on tendencies observed during onboarding</div></div>
+                <div class="flow-step step-action"><div class="flow-step-icon">2</div><div>Introduces Trainer and Training Modules</div></div>
+                <div class="flow-step step-outcome"><div class="flow-step-icon">3</div><div>Each drill gives feedback and refines user's profile</div></div>
+                <div class="flow-step step-gate"><div class="flow-step-icon">!</div><div>After X drills: "Want to see this with your actual hands? Download the Tracker"</div></div>
+              </div>
+              <div class="flow-section-title">Design Decisions</div>
+              <div class="decisions-grid">
+                <div class="decision-card">
+                  <div class="decision-card-title">Safety Net</div>
+                  <div class="decision-card-text">Not everyone is ready to install a tracker on day 1. Path B maintains engagement with drills until they're ready for the real product.</div>
+                </div>
+                <div class="decision-card">
+                  <div class="decision-card-title">Player Profile</div>
+                  <div class="decision-card-text">Investment loop (Hooked model): detected level, identified leaks, drill progress, session history. The more they use it, the more valuable the profile. Leaving = losing progress.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PART 3 -->
+      <div class="journey-item" data-phase="3">
+        <div class="journey-node">3</div>
+        <div class="journey-card">
+          <div class="journey-header" onclick="toggleJourney(this)">
+            <div class="journey-header-left">
+              <span class="journey-phase-label phase-3">Part 3</span>
+              <span class="journey-title">Progressive Onboarding</span>
+            </div>
+            <svg class="journey-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg>
+          </div>
+          <div class="journey-body">
+            <div class="journey-content">
+              <div class="flow-section-title">Timeline</div>
+              <div class="flow-steps">
+                <div class="flow-step step-action"><div class="flow-step-icon">D0</div><div>Activation onboarding (Parts 1 + 2)</div></div>
+                <div class="flow-step step-action"><div class="flow-step-icon">D1</div><div>Email: "Your new drills are ready based on yesterday's session" > Opens Trainer</div></div>
+                <div class="flow-step step-action"><div class="flow-step-icon">D3</div><div>Contextual onboarding when opening Library: mini-tutorial using THE USER'S DATA</div></div>
+                <div class="flow-step step-outcome"><div class="flow-step-icon">D7</div><div>Weekly Report: progress, new leaks, personalized drill. Upgrade prompt if free.</div></div>
+                <div class="flow-step step-outcome"><div class="flow-step-icon">+</div><div>Ongoing: Bitsize drills (2-3 min) when opening app. Progressively more complex.</div></div>
+              </div>
+              <div class="flow-section-title">Design Decisions</div>
+              <div class="decisions-grid">
+                <div class="decision-card">
+                  <div class="decision-card-title">Progressive Disclosure</div>
+                  <div class="decision-card-text">Start simple, complicate with time. Each feature has a contextual mini-onboarding discovered in context of use, not in a feature tour.</div>
+                </div>
+                <div class="decision-card">
+                  <div class="decision-card-title">AI-lite First</div>
+                  <div class="decision-card-text">Phase 1: template-based messages with dynamic variables (name, level, leaks). Perceived personalization nearly identical to AI-full, complexity 10x lower.</div>
+                </div>
+                <div class="decision-card">
+                  <div class="decision-card-title">Returning Users</div>
+                  <div class="decision-card-text">"Already have an account? Log in" visible but not dominant. Returning users skip drill, see "Welcome back. Here's what changed."</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PART 4 -->
+      <div class="journey-item" data-phase="4">
+        <div class="journey-node">4</div>
+        <div class="journey-card">
+          <div class="journey-header" onclick="toggleJourney(this)">
+            <div class="journey-header-left">
+              <span class="journey-phase-label phase-4">Part 4</span>
+              <span class="journey-title">Lifecycle / Re-engagement</span>
+            </div>
+            <svg class="journey-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg>
+          </div>
+          <div class="journey-body">
+            <div class="journey-content">
+              <div class="flow-section-title">Triggers</div>
+              <div class="flow-steps">
+                <div class="flow-step step-action"><div class="flow-step-icon">3d</div><div>Inactive 3 days: "Your leaks are waiting. 3-min drill ready." + deep link to drill</div></div>
+                <div class="flow-step step-action"><div class="flow-step-icon">7d</div><div>Inactive 7 days: "Players at your level improved 8% this month." Social proof + loss aversion</div></div>
+                <div class="flow-step step-action"><div class="flow-step-icon">14d</div><div>Inactive 14+ days: "We updated your drills with new spots." Novelty as trigger</div></div>
+                <div class="flow-step step-gate"><div class="flow-step-icon">!</div><div>Free user >50 hands: "Unlock unlimited + full reports." Upgrade at max engagement</div></div>
+                <div class="flow-step step-outcome"><div class="flow-step-icon">$</div><div>Paid user renewal: Progress report justifies price with the user's own data</div></div>
+              </div>
+              <div class="flow-section-title">Design Decisions</div>
+              <div class="decisions-grid">
+                <div class="decision-card">
+                  <div class="decision-card-title">Zero-Friction Re-entry</div>
+                  <div class="decision-card-text">Deep links directly to drills. No login screens, no menu navigation. One tap from email to value.</div>
+                </div>
+                <div class="decision-card">
+                  <div class="decision-card-title">User's Own Data</div>
+                  <div class="decision-card-text">Every re-engagement message uses the user's actual metrics and progress. Never generic. This is the core principle across all phases.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ==================== PRINCIPLES ==================== -->
+<section id="principles">
+  <div class="container fade-in">
+    <div class="section-label">Foundation</div>
+    <div class="section-title">Cross-cutting Principles</div>
+    <div class="section-desc">Rules that apply across every phase of the onboarding architecture.</div>
+
+    <div class="principles-grid">
+      <div class="principle-card">
+        <div class="principle-icon"><svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0a8 8 0 100 16A8 8 0 008 0zm3.5 7.5h-3v3a.5.5 0 01-1 0v-3h-3a.5.5 0 010-1h3v-3a.5.5 0 011 0v3h3a.5.5 0 010 1z"/></svg></div>
+        <div class="principle-text">Multi-game: NLHE + PLO. Identical flows, game-specific content</div>
+      </div>
+      <div class="principle-card">
+        <div class="principle-icon"><svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M8 16A8 8 0 108 0a8 8 0 000 16zm.93-9.412l-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.399l-.244-.017.028-.152h2.136z"/><circle cx="8" cy="4.5" r="1"/></svg></div>
+        <div class="principle-text">Honesty: 15 spots = tendencies, not diagnosis. Never inflate results</div>
+      </div>
+      <div class="principle-card">
+        <div class="principle-icon"><svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M10.561 8.073a6.005 6.005 0 013.432 5.142.75.75 0 11-1.498.07 4.5 4.5 0 00-8.99 0 .75.75 0 11-1.498-.07 6.004 6.004 0 013.431-5.142 3.999 3.999 0 115.123 0zM10.5 5a2.5 2.5 0 10-5 0 2.5 2.5 0 005 0z"/></svg></div>
+        <div class="principle-text">Every interaction uses THE USER'S DATA (never generic)</div>
+      </div>
+      <div class="principle-card">
+        <div class="principle-icon"><svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M8.834.066C7.494-.087 6.5 1.048 6.5 2.25v.5c0 1.329-.647 2.124-1.318 2.614-.328.24-.66.403-.918.508A1.75 1.75 0 003 4.25v7.5a1.75 1.75 0 002.164 1.699c.342-.065 1.014-.15 1.836-.15 1.4 0 2.373.333 3.166.612.518.183.953.337 1.334.337a1.75 1.75 0 001.75-1.75V5c0-.918-.646-1.643-1.407-1.843C11.252 3.01 10.5 2.427 10.5 1.75v-.5c0-.918-.768-1.272-1.666-1.184z"/></svg></div>
+        <div class="principle-text">Always deliver value before asking for something</div>
+      </div>
+      <div class="principle-card">
+        <div class="principle-icon"><svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M1.5 8a6.5 6.5 0 1113 0 6.5 6.5 0 01-13 0zM8 0a8 8 0 100 16A8 8 0 008 0zm.5 4.75a.75.75 0 00-1.5 0v3.5a.75.75 0 00.471.696l2.5 1a.75.75 0 00.557-1.392L8.5 7.742z"/></svg></div>
+        <div class="principle-text">Each feature discovered in context of use, not in a tour</div>
+      </div>
+      <div class="principle-card">
+        <div class="principle-icon"><svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M5.433 2.304A4.49 4.49 0 003.5 6c0 1.598.564 2.87 1.205 3.777.228.322.327.512.327.723H5v.5A1.5 1.5 0 006.5 12.5h3a1.5 1.5 0 001.5-1.5v-.5h-.032c0-.211.1-.401.327-.723C11.936 8.87 12.5 7.598 12.5 6a4.5 4.5 0 00-7.067-3.696z"/></svg></div>
+        <div class="principle-text">AI-lite first, AI-full later</div>
+      </div>
+      <div class="principle-card">
+        <div class="principle-icon"><svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M3.75 0a.75.75 0 01.75.75V2h7V.75a.75.75 0 011.5 0V2h.75c.966 0 1.75.784 1.75 1.75v10.5A1.75 1.75 0 0113.75 16H2.25A1.75 1.75 0 01.5 14.25V3.75C.5 2.784 1.284 2 2.25 2H3V.75A.75.75 0 013.75 0z"/></svg></div>
+        <div class="principle-text">Player Profile is the asset users build and don't want to lose</div>
+      </div>
+      <div class="principle-card">
+        <div class="principle-icon"><svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M3.75 0h8.5C13.216 0 14 .784 14 1.75v12.5A1.75 1.75 0 0112.25 16h-8.5A1.75 1.75 0 012 14.25V1.75C2 .784 2.784 0 3.75 0zM5 6.5A.5.5 0 005 7.5h6a.5.5 0 000-1H5zM5 9a.5.5 0 000 1h4a.5.5 0 000-1H5z"/></svg></div>
+        <div class="principle-text">Mobile-first on Part 1 (drill must work on phone)</div>
+      </div>
+      <div class="principle-card">
+        <div class="principle-icon"><svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0a8 8 0 100 16A8 8 0 008 0zm2.85 6.854l-3.5 3.5a.5.5 0 01-.708 0l-1.5-1.5a.5.5 0 01.708-.708L7 9.293l3.146-3.147a.5.5 0 01.708.708z"/></svg></div>
+        <div class="principle-text">Framing is always aspirational, never punitive</div>
+      </div>
+      <div class="principle-card">
+        <div class="principle-icon"><svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M8 2a1.5 1.5 0 100 3 1.5 1.5 0 000-3zM5.5 3.5a2.5 2.5 0 115 0 2.5 2.5 0 01-5 0zM.5 14.75A3.75 3.75 0 014.25 11h7.5A3.75 3.75 0 0115.5 14.75v.25a.75.75 0 01-1.5 0v-.25a2.25 2.25 0 00-2.25-2.25h-7.5A2.25 2.25 0 002 14.75v.25a.75.75 0 01-1.5 0z"/></svg></div>
+        <div class="principle-text">Test mode with reveal (frequencies hidden during decision)</div>
+      </div>
+      <div class="principle-card">
+        <div class="principle-icon"><svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M8.22 1.754a.25.25 0 00-.44 0L1.698 13.132a.25.25 0 00.22.368h12.164a.25.25 0 00.22-.368zm-1.763-.707c.659-1.234 2.427-1.234 3.086 0l6.082 11.378A1.75 1.75 0 0114.082 15H1.918a1.75 1.75 0 01-1.543-2.575z"/></svg></div>
+        <div class="principle-text">Single-street spots (not full hands) for speed and variety</div>
+      </div>
+      <div class="principle-card">
+        <div class="principle-icon"><svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M11.28 3.22a.75.75 0 010 1.06L4.56 11H7.75a.75.75 0 010 1.5h-5a.75.75 0 01-.75-.75v-5a.75.75 0 011.5 0v3.19l6.72-6.72a.75.75 0 011.06 0z"/></svg></div>
+        <div class="principle-text">Designed for A/B testing at critical decision points</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ==================== A/B TESTS ==================== -->
+<section id="tests">
+  <div class="container fade-in">
+    <div class="section-label">Testing</div>
+    <div class="section-title">Priority A/B Tests</div>
+    <div class="section-desc">Experiments to validate key assumptions and optimize conversion.</div>
+
+    <div class="tests-grid">
+      <div class="test-card">
+        <div class="test-number">1</div>
+        <div class="test-content">
+          <div class="test-title">10 vs 15 vs 20 Spots</div>
+          <div class="test-desc">Completion rate vs quality of detected tendencies. Finding the sweet spot between engagement and statistical value.</div>
+        </div>
+      </div>
+      <div class="test-card">
+        <div class="test-number">2</div>
+        <div class="test-content">
+          <div class="test-title">Gate: Two Options vs One</div>
+          <div class="test-desc">Sign-up rate and activation quality. Does offering a choice improve intent-based routing?</div>
+        </div>
+      </div>
+      <div class="test-card">
+        <div class="test-number">3</div>
+        <div class="test-content">
+          <div class="test-title">Result Framing</div>
+          <div class="test-desc">Different copy by performance level. Testing aspirational vs neutral framing on conversion.</div>
+        </div>
+      </div>
+      <div class="test-card">
+        <div class="test-number">4</div>
+        <div class="test-content">
+          <div class="test-title">Path B: Drills vs Days</div>
+          <div class="test-desc">Push to tracker after X drills vs Y days. When to convert explorers into real product users.</div>
+        </div>
+      </div>
+      <div class="test-card">
+        <div class="test-number">5</div>
+        <div class="test-content">
+          <div class="test-title">Per-Spot Feedback</div>
+          <div class="test-desc">With vs without reveal after each spot. Does immediate feedback increase or decrease completion?</div>
+        </div>
+      </div>
+      <div class="test-card">
+        <div class="test-number">6</div>
+        <div class="test-content">
+          <div class="test-title">High Stakes Bypass</div>
+          <div class="test-desc">Skill check vs explore product for advanced players. Which path converts better at high stakes?</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ==================== OPEN DECISIONS ==================== -->
+<section id="decisions">
+  <div class="container fade-in">
+    <div class="section-label">Pending</div>
+    <div class="section-title">Open Decisions</div>
+    <div class="section-desc">Items that need team input before implementation can proceed.</div>
+
+    <div class="decisions-list">
+      <div class="open-decision">
+        <div class="od-number">1</div>
+        <div class="od-content">
+          <div class="od-question">Does the Tracker work on the free plan?</div>
+          <div class="od-impact">Impact: Part 2 Path A viability. If no free tracker, Path A must lead to upgrade first.</div>
+        </div>
+      </div>
+      <div class="open-decision">
+        <div class="od-number">2</div>
+        <div class="od-content">
+          <div class="od-question">Who curates the pre-selected spots and how often?</div>
+          <div class="od-impact">Impact: NLHE + PLO = two separate pools. Needs ongoing curation and quality control.</div>
+        </div>
+      </div>
+      <div class="open-decision">
+        <div class="od-number">3</div>
+        <div class="od-content">
+          <div class="od-question">Email/notification infrastructure: exists or needs to be built?</div>
+          <div class="od-impact">Impact: Parts 3 and 4 depend entirely on email/push capability for progressive onboarding and re-engagement.</div>
+        </div>
+      </div>
+      <div class="open-decision">
+        <div class="od-number">4</div>
+        <div class="od-content">
+          <div class="od-question">Timeline for AI-full (Part 3 Phase 2)?</div>
+          <div class="od-impact">Impact: Determines when to invest in LLM infrastructure vs staying with AI-lite templates.</div>
+        </div>
+      </div>
+      <div class="open-decision">
+        <div class="od-number">5</div>
+        <div class="od-content">
+          <div class="od-question">Features available for NLHE at launch: same as PLO or subset?</div>
+          <div class="od-impact">Impact: Defines scope of multi-game launch. Subset = faster launch, same = consistent experience.</div>
+        </div>
+      </div>
+      <div class="open-decision">
+        <div class="od-number">6</div>
+        <div class="od-content">
+          <div class="od-question">"Explore the product" flow for High Stakes bypass: what do they see?</div>
+          <div class="od-impact">Impact: Needs dedicated UX for experienced players. Database quality, solver speed, replayer UI demo.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== FOOTER ==================== -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-text"><span>FlopHero</span> Onboarding Architecture &mdash; Internal Document</div>
+    <div class="footer-status">
+      <span class="badge-dot"></span>
+      Status: Approved &mdash; Pending team decisions &bull; v1.0 &bull; February 2026
+    </div>
+  </div>
+</footer>
+
+<!-- ==================== SCRIPTS ==================== -->
 <script>
-  // Make KPI values editable and update bars
-  document.querySelectorAll('.kpi-actual').forEach(el => {
-    el.addEventListener('blur', function() {
-      const val = parseFloat(this.textContent);
-      const target = parseFloat(this.dataset.target);
-      const bar = this.closest('.kpi-card').querySelector('.kpi-bar-fill');
+  // Particle generator
+  (function() {
+    const container = document.getElementById('particles');
+    const count = 30;
+    for (let i = 0; i < count; i++) {
+      const p = document.createElement('div');
+      p.className = 'particle';
+      p.style.left = Math.random() * 100 + '%';
+      p.style.bottom = '-10px';
+      p.style.animationDuration = (3 + Math.random() * 5) + 's';
+      p.style.animationDelay = (Math.random() * 6) + 's';
+      p.style.width = (1 + Math.random() * 2) + 'px';
+      p.style.height = p.style.width;
+      container.appendChild(p);
+    }
+  })();
 
-      if (isNaN(val) || this.textContent.trim() === '--') {
-        this.classList.add('pending');
-        this.classList.remove('has-value');
-        bar.className = 'kpi-bar-fill pending';
-        bar.style.width = '0%';
-        return;
-      }
+  // Journey accordion
+  function toggleJourney(header) {
+    const item = header.closest('.journey-item');
+    item.classList.toggle('active');
+  }
 
-      this.classList.remove('pending');
-      this.textContent = val + '%';
-
-      const pct = Math.min((val / target) * 100, 100);
-      bar.style.width = pct + '%';
-
-      if (val >= target) {
-        bar.className = 'kpi-bar-fill good';
-      } else if (val >= target * 0.7) {
-        bar.className = 'kpi-bar-fill warning';
-      } else {
-        bar.className = 'kpi-bar-fill';
-        bar.style.background = 'var(--red)';
-      }
-    });
-
-    el.addEventListener('focus', function() {
-      if (this.textContent.trim() === '--') {
-        this.textContent = '';
-      } else {
-        this.textContent = this.textContent.replace('%', '');
-      }
-    });
-
-    el.addEventListener('keydown', function(e) {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        this.blur();
+  // Smooth scroll for phase nav
+  document.querySelectorAll('.phase-pill').forEach(pill => {
+    pill.addEventListener('click', function(e) {
+      e.preventDefault();
+      const target = document.querySelector(this.getAttribute('href'));
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     });
   });
+
+  // Intersection Observer for fade-in and bar animations
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+
+        // Animate KPI bars
+        entry.target.querySelectorAll('.kpi-bar-fill').forEach(bar => {
+          setTimeout(() => {
+            bar.style.width = bar.dataset.width + '%';
+          }, 200);
+        });
+
+        // Animate funnel bars
+        entry.target.querySelectorAll('.funnel-bar').forEach(bar => {
+          setTimeout(() => {
+            bar.style.width = bar.dataset.width + '%';
+          }, 200);
+        });
+
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
 </script>
+
 </body>
 </html>

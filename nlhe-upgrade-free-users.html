@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="FlopHero now supports NLHE. Upgrade from Free to unlock unlimited hands.">
+    <title>FlopHero | Upgrade to Unlimited</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg: #0c0c0e;
+            --bg-card: #141416;
+            --bg-card-hover: #1a1a1e;
+            --border: rgba(255,255,255,0.08);
+            --border-hover: rgba(255,255,255,0.14);
+            --text: #f0f0f0;
+            --text-secondary: #8a8a8a;
+            --text-muted: #555;
+            --accent: #fac515;
+            --accent-dim: #e5b413;
+            --green: #34d399;
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            overflow-x: hidden;
+            line-height: 1.5;
+        }
+
+        /* Subtle noise grain */
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+            background-repeat: repeat;
+            background-size: 256px;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.4;
+            mix-blend-mode: overlay;
+        }
+
+        ::selection { background: rgba(250,197,21,0.2); }
+        a { color: inherit; text-decoration: none; }
+        img { max-width: 100%; display: block; }
+        button { border: none; background: none; cursor: pointer; font: inherit; color: inherit; }
+
+        .w { max-width: 720px; margin: 0 auto; padding: 0 32px; }
+        .w-wide { max-width: 960px; margin: 0 auto; padding: 0 32px; }
+
+        /* ---- Hero (centered, personal) ---- */
+        .hero {
+            padding: 80px 0 100px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        /* Ambient glow */
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 1200px;
+            height: 800px;
+            background: radial-gradient(ellipse, rgba(250,160,30,0.3) 0%, rgba(220,120,20,0.16) 25%, rgba(180,80,15,0.08) 50%, transparent 75%);
+            pointer-events: none;
+        }
+        .hero > * { position: relative; z-index: 1; }
+        .hero-logo { height: 24px; margin: 0 auto 48px; opacity: 0.9; }
+        .hero h1 {
+            font-size: clamp(36px, 5.5vw, 56px);
+            font-weight: 700;
+            line-height: 1.08;
+            letter-spacing: -0.04em;
+            margin-bottom: 18px;
+        }
+        .hero h1 em {
+            font-style: normal;
+            color: var(--accent);
+        }
+        .hero-sub {
+            font-size: 17px;
+            color: var(--text-secondary);
+            line-height: 1.65;
+            max-width: 520px;
+            margin: 0 auto 36px;
+        }
+        .cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--accent);
+            color: #000;
+            padding: 16px 36px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.25s;
+            position: relative;
+            overflow: hidden;
+        }
+        .cta:hover {
+            background: var(--accent-dim);
+            box-shadow: 0 0 40px rgba(250,197,21,0.2);
+            transform: translateY(-1px);
+        }
+        .cta:active { transform: scale(0.98); }
+        .cta svg { transition: transform 0.2s; }
+        .cta:hover svg { transform: translateX(3px); }
+        .cta::before {
+            content: '';
+            position: absolute;
+            width: 100px; height: 100px;
+            background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);
+            border-radius: 50%;
+            transform: translate(-50%,-50%);
+            left: var(--mx, -100px);
+            top: var(--my, -100px);
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+        .cta:hover::before { opacity: 1; }
+        .hero-social {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+        .hero-social .stars {
+            color: var(--accent);
+            font-size: 12px;
+            letter-spacing: 1px;
+        }
+        .hero-social q {
+            font-style: italic;
+            quotes: none;
+        }
+        .hero-social cite {
+            font-style: normal;
+            color: var(--text-muted);
+        }
+        .pricing-trust {
+            text-align: center;
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .trust-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+        .trust-item svg { flex-shrink: 0; }
+
+        /* ---- The problem (free limitation) ---- */
+        .limitation {
+            padding: 0 0 120px;
+        }
+        .limit-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .limit-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 40px 32px;
+            transition: border-color 0.3s;
+        }
+        .limit-card:hover { border-color: var(--border-hover); }
+        .limit-card.free .limit-label { color: var(--text-muted); }
+        .limit-card.paid {
+            border-color: rgba(250,197,21,0.2);
+            background: linear-gradient(180deg, rgba(250,197,21,0.02) 0%, var(--bg-card) 30%);
+        }
+        .limit-card.paid .limit-label { color: var(--accent); }
+        .limit-label {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+        .limit-card h3 {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            margin-bottom: 16px;
+            line-height: 1.15;
+        }
+        .limit-list {
+            list-style: none;
+        }
+        .limit-list li {
+            font-size: 14px;
+            color: var(--text-secondary);
+            padding: 8px 0;
+            padding-left: 22px;
+            position: relative;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+        }
+        .limit-list li:last-child { border-bottom: none; }
+        .limit-card.free .limit-list li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 15px;
+            width: 8px;
+            height: 2px;
+            background: var(--text-muted);
+        }
+        .limit-card.paid .limit-list li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 14px;
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: var(--green);
+        }
+
+        /* ---- NLHE announcement ---- */
+        .nlhe-announce {
+            padding: 0 0 120px;
+            text-align: center;
+        }
+        .nlhe-announce h2 {
+            font-size: clamp(28px, 4vw, 40px);
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            margin-bottom: 14px;
+        }
+        .nlhe-announce p {
+            font-size: 16px;
+            color: var(--text-secondary);
+            line-height: 1.65;
+            max-width: 520px;
+            margin: 0 auto 40px;
+        }
+        .nlhe-visual-wrap {
+            position: relative;
+        }
+        .nlhe-visual-wrap::before {
+            content: '';
+            position: absolute;
+            inset: -32px;
+            background: radial-gradient(ellipse, rgba(250,180,40,0.2) 0%, transparent 65%);
+            border-radius: 28px;
+            filter: blur(44px);
+            pointer-events: none;
+            opacity: 0.75;
+            transition: opacity 0.5s;
+        }
+        .nlhe-visual-wrap:hover::before { opacity: 0.85; }
+        .nlhe-visual {
+            position: relative;
+            border-radius: 14px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            box-shadow: 0 24px 64px -16px rgba(0,0,0,0.5);
+            transform-style: preserve-3d;
+        }
+        .nlhe-visual img { width: 100%; }
+
+        /* ---- Pricing ---- */
+        .pricing {
+            padding: 0 0 120px;
+        }
+        .pricing-head {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+        .pricing-head h2 {
+            font-size: 36px;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            margin-bottom: 10px;
+        }
+        .pricing-head p {
+            font-size: 15px;
+            color: var(--text-secondary);
+        }
+        .p-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+        .p-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 36px 28px;
+            transition: all 0.3s;
+            position: relative;
+        }
+        .p-card:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-4px);
+            box-shadow: 0 16px 48px -8px rgba(0,0,0,0.4);
+        }
+        .p-card.pop {
+            border-color: rgba(250,197,21,0.25);
+            background: linear-gradient(180deg, rgba(250,197,21,0.03) 0%, var(--bg-card) 40%);
+        }
+        .p-card.pop::after {
+            content: 'Popular';
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--accent);
+            color: #000;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 14px;
+            border-radius: 100px;
+        }
+        .p-card-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+        .p-card.pop .p-card-name { color: var(--accent); }
+        .p-card-price {
+            font-size: 48px;
+            font-weight: 700;
+            letter-spacing: -0.04em;
+            line-height: 1;
+        }
+        .p-card-price span {
+            font-size: 16px;
+            font-weight: 400;
+            color: var(--text-muted);
+        }
+        .p-card-annual {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 4px;
+            margin-bottom: 28px;
+        }
+        .p-card ul { list-style: none; margin-bottom: 28px; }
+        .p-card li {
+            font-size: 13px;
+            color: var(--text-secondary);
+            padding: 5px 0;
+        }
+        .p-card-btn {
+            display: block;
+            width: 100%;
+            text-align: center;
+            padding: 12px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+        }
+        .p-card-btn:hover { border-color: var(--border-hover); color: var(--text); }
+        .p-card-btn.primary {
+            background: var(--accent);
+            border-color: transparent;
+            color: #000;
+        }
+        .p-card-btn.primary:hover {
+            background: var(--accent-dim);
+            box-shadow: 0 0 24px rgba(250,197,21,0.15);
+        }
+        .pricing-note {
+            text-align: center;
+            margin-top: 24px;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        /* ---- Promo ---- */
+        .promo-section {
+            padding: 0 0 120px;
+            text-align: center;
+        }
+        .promo-box {
+            background: var(--bg-card);
+            border: 1px solid rgba(250,197,21,0.15);
+            border-radius: 16px;
+            padding: 48px 40px;
+        }
+        .promo-box h3 {
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 8px;
+        }
+        .promo-box p {
+            font-size: 15px;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+        }
+        .promo-code-box {
+            display: inline-block;
+            background: rgba(250,197,21,0.08);
+            border: 1px solid rgba(250,197,21,0.2);
+            color: var(--accent);
+            padding: 8px 24px;
+            border-radius: 8px;
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+        }
+
+        /* ---- Closing ---- */
+        .closing {
+            padding: 80px 0 100px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .closing::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 900px;
+            height: 500px;
+            background: radial-gradient(ellipse, rgba(250,180,40,0.16) 0%, rgba(250,197,21,0.07) 40%, transparent 70%);
+            pointer-events: none;
+        }
+        .closing > * { position: relative; z-index: 1; }
+        .closing h2 {
+            font-size: clamp(32px, 4.5vw, 48px);
+            font-weight: 700;
+            letter-spacing: -0.04em;
+            line-height: 1.1;
+            margin-bottom: 14px;
+        }
+        .closing p {
+            font-size: 15px;
+            color: var(--text-secondary);
+            margin-bottom: 28px;
+        }
+
+        /* ---- Footer ---- */
+        footer {
+            border-top: 1px solid rgba(255,255,255,0.06);
+            padding: 32px 0;
+        }
+        .footer-disclaimer {
+            font-size: 11px;
+            color: var(--text-muted);
+            line-height: 1.7;
+            text-align: center;
+            margin-bottom: 16px;
+        }
+        .footer-disclaimer a {
+            color: var(--text-secondary);
+            text-decoration: underline;
+            text-underline-offset: 2px;
+        }
+        .footer-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        .footer-row a {
+            color: var(--text-muted);
+            margin-left: 16px;
+            transition: color 0.2s;
+        }
+        .footer-row a:hover { color: var(--text-secondary); }
+
+        /* ---- Floating particles + orbs ---- */
+        .atmosphere {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+            background:
+                radial-gradient(ellipse at 15% 0%, rgba(180,80,20,0.28) 0%, rgba(140,50,10,0.14) 25%, transparent 55%),
+                radial-gradient(ellipse at 85% 5%, rgba(200,100,15,0.22) 0%, rgba(160,70,10,0.1) 25%, transparent 55%),
+                radial-gradient(ellipse at 50% 0%, rgba(250,180,40,0.18) 0%, rgba(200,140,30,0.08) 30%, transparent 60%),
+                radial-gradient(ellipse at 0% 50%, rgba(180,80,20,0.12) 0%, transparent 40%),
+                radial-gradient(ellipse at 100% 40%, rgba(200,100,20,0.1) 0%, transparent 40%);
+        }
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(90px);
+            opacity: 0;
+            animation: drift 18s ease-in-out infinite;
+        }
+        .orb-1 {
+            width: 580px; height: 580px;
+            background: radial-gradient(circle, rgba(250,150,30,0.25) 0%, rgba(200,80,15,0.15) 50%, transparent 70%);
+            top: -5%; left: -10%;
+            animation-delay: 0s;
+        }
+        .orb-2 {
+            width: 450px; height: 450px;
+            background: radial-gradient(circle, rgba(250,180,40,0.2) 0%, rgba(220,120,20,0.12) 50%, transparent 70%);
+            top: 40%; right: -10%;
+            animation-delay: -6s;
+        }
+        @keyframes drift {
+            0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.7; }
+            25% { transform: translate(30px, -40px) scale(1.1); opacity: 0.9; }
+            50% { transform: translate(-20px, 20px) scale(0.95); opacity: 0.6; }
+            75% { transform: translate(40px, 30px) scale(1.05); opacity: 0.85; }
+        }
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(250,180,40,0.7);
+            box-shadow: 0 0 8px rgba(250,160,30,0.4);
+            animation: rise linear infinite;
+        }
+        @keyframes rise {
+            0% { transform: translateY(0) scale(0); opacity: 0; }
+            10% { opacity: 0.9; transform: translateY(-10vh) scale(1); }
+            90% { opacity: 0.3; }
+            100% { transform: translateY(-110vh) scale(0.5); opacity: 0; }
+        }
+
+        /* ---- Animations ---- */
+        .reveal {
+            opacity: 0;
+            transform: translateY(28px);
+            transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .reveal.in { opacity: 1; transform: none; }
+        .reveal-d1 { transition-delay: 0.08s; }
+        .reveal-d2 { transition-delay: 0.16s; }
+        .reveal-d3 { transition-delay: 0.24s; }
+
+        /* ---- Responsive ---- */
+        @media (max-width: 900px) {
+            .p-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+        }
+        @media (max-width: 768px) {
+            .limit-grid { grid-template-columns: 1fr; }
+            .p-grid { grid-template-columns: 1fr; max-width: 380px; margin: 0 auto; }
+            .w, .w-wide { padding: 0 20px; }
+            .promo-box { padding: 36px 24px; }
+            .footer-row { flex-direction: column; gap: 8px; text-align: center; }
+            .hero-social { flex-direction: column; gap: 4px; }
+            .pricing-trust { flex-direction: column; align-items: center; gap: 10px; }
+            .cta { width: 100%; justify-content: center; min-height: 48px; }
+        }
+        @media (max-width: 480px) {
+            .hero h1 { font-size: 32px; }
+            .hero { padding: 60px 0 80px; }
+            .limit-card { padding: 28px 20px; }
+            .limit-card h3 { font-size: 22px; }
+            .promo-code-box { font-size: 16px; padding: 6px 18px; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .reveal { opacity: 1; transform: none; transition: none; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Atmosphere: orbs + particles -->
+<div class="atmosphere" id="atmosphere">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+</div>
+
+<!-- ============================================= -->
+<!-- HERO                                          -->
+<!-- ============================================= -->
+<section class="hero">
+    <div class="w">
+        <img src="images/logo-on-dark-alt.png" alt="FlopHero" class="hero-logo reveal">
+        <h1 class="reveal reveal-d1">You've Seen Your Leaks.<br>Now <em>Fix All of Them</em>.</h1>
+        <p class="hero-sub reveal reveal-d2">
+            10 hands a day is enough to know you have problems. It's not enough to solve them. Upgrade and get unlimited access to every tool.
+        </p>
+        <a href="https://flophero.com" class="cta reveal reveal-d3">
+            Upgrade Now
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3L11 8L6 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+
+        <div class="hero-social reveal reveal-d3">
+            <span class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+            <q>The EV ranking made my leaks impossible to ignore</q>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================= -->
+<!-- FREE vs PAID                                  -->
+<!-- ============================================= -->
+<section class="limitation">
+    <div class="w-wide">
+        <div class="limit-grid">
+            <div class="limit-card free reveal">
+                <div class="limit-label">Your Free Plan</div>
+                <h3>10 hands per day</h3>
+                <ul class="limit-list">
+                    <li>See that leaks exist</li>
+                    <li>Limited sessions to review</li>
+                    <li>Trainer resets daily</li>
+                    <li>Can't track progress over time</li>
+                </ul>
+            </div>
+            <div class="limit-card paid reveal reveal-d1">
+                <div class="limit-label">With a Paid Plan</div>
+                <h3>Unlimited hands. Every day.</h3>
+                <ul class="limit-list">
+                    <li>Study every leak in full</li>
+                    <li>Unlimited session analysis</li>
+                    <li>Train as long as you want</li>
+                    <li>Track improvement over weeks and months</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================= -->
+<!-- NLHE ANNOUNCEMENT                             -->
+<!-- ============================================= -->
+<section class="nlhe-announce">
+    <div class="w">
+        <h2 class="reveal">NLHE is here.</h2>
+        <p class="reveal reveal-d1">Everything you know from PLO, now for Hold'em. Same automated leak detection. Same GTO solutions. Same instant feedback.</p>
+    </div>
+    <div class="w-wide">
+        <div class="reveal reveal-d2">
+            <div class="nlhe-visual-wrap">
+                <div class="nlhe-visual" data-tilt="3">
+                    <img src="images/sessions-dashboard-new.png" alt="FlopHero NLHE sessions dashboard" loading="lazy">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================= -->
+<!-- PRICING                                       -->
+<!-- ============================================= -->
+<section class="pricing" id="pricing">
+    <div class="w-wide">
+        <div class="pricing-head reveal">
+            <h2>Pick your stakes</h2>
+            <p>Same features on every plan. Choose based on the stakes you play.</p>
+        </div>
+
+        <div class="p-grid">
+            <div class="p-card reveal">
+                <div class="p-card-name">Low Stakes</div>
+                <div class="p-card-price">$50<span>/mo</span></div>
+                <div class="p-card-annual">$37.50/mo annually (25% off)</div>
+                <ul>
+                    <li>Up to $0.25/$0.50</li>
+                    <li>Unlimited hands</li>
+                    <li>All features included</li>
+                    <li>PLO + NLHE</li>
+                </ul>
+                <a href="https://flophero.com" class="p-card-btn">Upgrade</a>
+            </div>
+            <div class="p-card pop reveal reveal-d1">
+                <div class="p-card-name">Mid Stakes</div>
+                <div class="p-card-price">$100<span>/mo</span></div>
+                <div class="p-card-annual">$75/mo annually (25% off)</div>
+                <ul>
+                    <li>Up to $2/$4</li>
+                    <li>Unlimited hands</li>
+                    <li>All features included</li>
+                    <li>PLO + NLHE</li>
+                </ul>
+                <a href="https://flophero.com" class="p-card-btn primary">Upgrade</a>
+            </div>
+            <div class="p-card reveal reveal-d2">
+                <div class="p-card-name">High Stakes</div>
+                <div class="p-card-price">$200<span>/mo</span></div>
+                <div class="p-card-annual">$150/mo annually (25% off)</div>
+                <ul>
+                    <li>All stakes</li>
+                    <li>Unlimited hands</li>
+                    <li>All features included</li>
+                    <li>PLO + NLHE</li>
+                </ul>
+                <a href="https://flophero.com" class="p-card-btn">Upgrade</a>
+            </div>
+        </div>
+        <div class="pricing-trust reveal">
+            <div class="trust-item">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1L10 5.5L15 6L11.5 9.5L12.5 14.5L8 12L3.5 14.5L4.5 9.5L1 6L6 5.5L8 1Z" fill="#fac515"/></svg>
+                7-day money-back guarantee
+            </div>
+            <div class="trust-item">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M13.3 4.7L6.5 11.5L2.7 7.7" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Cancel anytime
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================= -->
+<!-- PROMO CODE                                    -->
+<!-- ============================================= -->
+<section class="promo-section">
+    <div class="w">
+        <div class="promo-box reveal">
+            <h3>10% off your first month</h3>
+            <p>Use this code at checkout. Expires in 14 days.</p>
+            <div class="promo-code-box">NLHELAUNCH</div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================= -->
+<!-- CLOSING                                       -->
+<!-- ============================================= -->
+<section class="closing">
+    <div class="w">
+        <h2 class="reveal">You already know<br>where you're losing.</h2>
+        <p class="reveal reveal-d1">Now study every spot. Fix every leak. No limits.</p>
+        <a href="https://flophero.com" class="cta reveal reveal-d2">
+            Upgrade Now
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3L11 8L6 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+    </div>
+</section>
+
+
+<!-- ============================================= -->
+<!-- FOOTER                                        -->
+<!-- ============================================= -->
+<footer>
+    <div class="w">
+        <div class="footer-disclaimer">
+            FlopHero is a poker study platform for adult users (18+). Strictly educational. <a href="https://www.ncpgambling.org" target="_blank" rel="noopener">ncpgambling.org</a>
+        </div>
+        <div class="footer-row">
+            <span>&copy; 2026 Algo Software DMCC</span>
+            <div>
+                <a href="https://flophero.com/privacy">Privacy</a>
+                <a href="https://flophero.com/terms">Terms</a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script>
+(function(){
+    'use strict';
+
+    // Tilt
+    document.querySelectorAll('[data-tilt]').forEach(el => {
+        const i = +el.dataset.tilt || 6;
+        let h = false;
+        el.addEventListener('mousemove', e => {
+            const r = el.getBoundingClientRect();
+            const rx = ((e.clientY - r.top - r.height/2) / (r.height/2)) * -i;
+            const ry = ((e.clientX - r.left - r.width/2) / (r.width/2)) * i;
+            el.style.transform = `perspective(800px) rotateX(${rx}deg) rotateY(${ry}deg)`;
+            el.style.transition = h ? 'none' : 'transform .1s';
+            h = true;
+        });
+        el.addEventListener('mouseleave', () => {
+            el.style.transform = '';
+            el.style.transition = 'transform .5s ease-out';
+            h = false;
+        });
+    });
+
+    // CTA glow
+    document.querySelectorAll('.cta').forEach(b => {
+        b.addEventListener('mousemove', e => {
+            const r = b.getBoundingClientRect();
+            b.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+            b.style.setProperty('--my', (e.clientY - r.top) + 'px');
+        });
+    });
+
+    // Reveal
+    const io = new IntersectionObserver(entries => {
+        entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }});
+    }, { threshold: 0.12, rootMargin: '0px 0px -60px 0px' });
+    document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+    // Floating particles
+    const atm = document.getElementById('atmosphere');
+    function spawnParticle() {
+        const p = document.createElement('div');
+        p.classList.add('particle');
+        const size = 2 + Math.random() * 4;
+        const left = Math.random() * 100;
+        const dur = 8 + Math.random() * 12;
+        const delay = Math.random() * 2;
+        p.style.cssText = `width:${size}px;height:${size}px;left:${left}%;bottom:-10px;animation-duration:${dur}s;animation-delay:${delay}s;`;
+        atm.appendChild(p);
+        setTimeout(() => p.remove(), (dur + delay) * 1000);
+    }
+    for (let i = 0; i < 10; i++) setTimeout(spawnParticle, i * 500);
+    setInterval(spawnParticle, 3000);
+})();
+</script>
+</body>
+</html>

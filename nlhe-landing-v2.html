@@ -1,0 +1,1593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="FlopHero shows you exactly which Hold'em mistakes cost the most. Automated leak detection. Free to start.">
+    <title>FlopHero NLHE | See Where You're Losing Money</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg: #0c0c0e;
+            --bg-elevated: #111113;
+            --bg-card: #141416;
+            --bg-card-hover: #1a1a1e;
+            --border: rgba(255,255,255,0.08);
+            --border-hover: rgba(255,255,255,0.14);
+            --text: #f0f0f0;
+            --text-secondary: #8a8a8a;
+            --text-muted: #555;
+            --accent: #fac515;
+            --accent-dim: #e5b413;
+            --green: #34d399;
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            overflow-x: hidden;
+            line-height: 1.5;
+        }
+
+        /* Subtle noise grain */
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+            background-repeat: repeat;
+            background-size: 256px;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.4;
+            mix-blend-mode: overlay;
+        }
+
+        ::selection { background: rgba(250,197,21,0.2); }
+        a { color: inherit; text-decoration: none; }
+        img { max-width: 100%; display: block; }
+        button { border: none; background: none; cursor: pointer; font: inherit; color: inherit; }
+
+        /* ---- Layout ---- */
+        .w { max-width: 1120px; margin: 0 auto; padding: 0 32px; }
+        .w-narrow { max-width: 800px; margin: 0 auto; padding: 0 32px; }
+        .w-wide { max-width: 1280px; margin: 0 auto; padding: 0 32px; }
+
+        /* ---- Promo Banner ---- */
+        .promo {
+            background: var(--bg-elevated);
+            border-bottom: 1px solid var(--border);
+            text-align: center;
+            padding: 10px 48px 10px 20px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            position: relative;
+        }
+        .promo strong { color: var(--text); font-weight: 600; }
+        .promo-code {
+            display: inline-block;
+            background: rgba(250,197,21,0.08);
+            border: 1px solid rgba(250,197,21,0.18);
+            color: var(--accent);
+            padding: 1px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            margin-left: 6px;
+        }
+        .promo-x {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 16px;
+            padding: 4px;
+            line-height: 1;
+        }
+        .promo-x:hover { color: var(--text-secondary); }
+
+        /* ---- Header ---- */
+        .hdr {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            background: rgba(12,12,14,0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            transition: top 0.3s;
+        }
+        .hdr.has-promo { top: 37px; }
+        .hdr-inner {
+            max-width: 1120px;
+            margin: 0 auto;
+            padding: 14px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .hdr-logo { height: 26px; opacity: 0.95; }
+        .hdr-nav { display: flex; gap: 28px; align-items: center; }
+        .hdr-nav a {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            transition: color 0.2s;
+        }
+        .hdr-nav a:hover { color: var(--text); }
+        .hdr-cta {
+            background: var(--accent);
+            color: #000;
+            padding: 8px 18px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+        .hdr-cta:hover {
+            background: var(--accent-dim);
+            box-shadow: 0 0 24px rgba(250,197,21,0.15);
+        }
+
+        /* ---- Hero (split layout) ---- */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 140px 0 80px;
+            position: relative;
+            overflow: hidden;
+        }
+        /* Ambient glow behind hero */
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 1400px;
+            height: 900px;
+            background: radial-gradient(ellipse, rgba(250,160,30,0.3) 0%, rgba(220,120,20,0.16) 25%, rgba(180,80,15,0.08) 50%, transparent 75%);
+            pointer-events: none;
+        }
+        .hero-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.15fr;
+            gap: 56px;
+            align-items: center;
+        }
+        .hero-text h1 {
+            font-size: clamp(38px, 5vw, 60px);
+            font-weight: 700;
+            line-height: 1.06;
+            letter-spacing: -0.04em;
+            margin-bottom: 18px;
+        }
+        .hero-text h1 em {
+            font-style: normal;
+            color: var(--accent);
+        }
+        .hero-sub {
+            font-size: 17px;
+            color: var(--text-secondary);
+            line-height: 1.65;
+            margin-bottom: 32px;
+            max-width: 460px;
+        }
+        .hero-sub strong { color: var(--text); font-weight: 500; }
+        .hero-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+        .cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--accent);
+            color: #000;
+            padding: 15px 32px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.25s;
+            position: relative;
+            overflow: hidden;
+        }
+        .cta:hover {
+            background: var(--accent-dim);
+            box-shadow: 0 0 40px rgba(250,197,21,0.2);
+            transform: translateY(-1px);
+        }
+        .cta:active { transform: scale(0.98); }
+        .cta svg { transition: transform 0.2s; }
+        .cta:hover svg { transform: translateX(3px); }
+        .cta::before {
+            content: '';
+            position: absolute;
+            width: 100px; height: 100px;
+            background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);
+            border-radius: 50%;
+            transform: translate(-50%,-50%);
+            left: var(--mx, -100px);
+            top: var(--my, -100px);
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+        .cta:hover::before { opacity: 1; }
+        .btn-ghost {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-secondary);
+            padding: 13px 20px;
+            border-radius: 10px;
+            font-weight: 500;
+            font-size: 15px;
+            border: 1px solid var(--border);
+            transition: all 0.2s;
+        }
+        .btn-ghost:hover { color: var(--text); border-color: var(--border-hover); }
+        .hero-trust {
+            font-size: 12px;
+            color: var(--text-muted);
+            letter-spacing: 0.01em;
+        }
+        .hero-trust span { margin: 0 6px; }
+        .hero-social {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 16px;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+        .hero-social .stars {
+            color: var(--accent);
+            font-size: 12px;
+            letter-spacing: 1px;
+        }
+        .hero-social q {
+            font-style: italic;
+            quotes: none;
+        }
+        .hero-social cite {
+            font-style: normal;
+            color: var(--text-muted);
+        }
+
+        /* Hero visual */
+        .hero-visual {
+            position: relative;
+            transform-style: preserve-3d;
+        }
+        /* Glow behind video */
+        .hero-visual::before {
+            content: '';
+            position: absolute;
+            inset: -32px;
+            background: radial-gradient(ellipse, rgba(250,180,40,0.24) 0%, rgba(250,197,21,0.1) 45%, transparent 70%);
+            border-radius: 24px;
+            filter: blur(40px);
+            pointer-events: none;
+            opacity: 0.85;
+            transition: opacity 0.6s;
+        }
+        .hero-visual:hover::before { opacity: 0.9; }
+        .hero-visual-inner {
+            position: relative;
+            border-radius: 14px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            box-shadow: 0 32px 80px -16px rgba(0,0,0,0.6);
+        }
+        .hero-visual video { width: 100%; display: block; }
+
+        /* ---- Steps (horizontal, minimal) ---- */
+        .steps {
+            padding: 0 0 140px;
+            border-top: 1px solid var(--border);
+        }
+        .steps-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0;
+        }
+        .step {
+            padding: 56px 40px;
+            border-right: 1px solid var(--border);
+            position: relative;
+        }
+        .step:last-child { border-right: none; }
+        .step-n {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            letter-spacing: 0.08em;
+            margin-bottom: 16px;
+        }
+        .step h3 {
+            font-size: 20px;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            margin-bottom: 8px;
+        }
+        .step p {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.65;
+        }
+
+        /* ---- Showcase (full-width featured image + text) ---- */
+        .showcase {
+            padding: 0 0 160px;
+        }
+        .showcase-main {
+            position: relative;
+            margin-bottom: 80px;
+        }
+        .showcase-img {
+            position: relative;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            box-shadow: 0 32px 80px -16px rgba(0,0,0,0.5);
+            transform-style: preserve-3d;
+        }
+        /* Glow behind showcase */
+        .showcase-main::before {
+            content: '';
+            position: absolute;
+            inset: -36px;
+            background: radial-gradient(ellipse, rgba(250,180,40,0.2) 0%, transparent 65%);
+            border-radius: 28px;
+            filter: blur(48px);
+            pointer-events: none;
+            opacity: 0.75;
+            transition: opacity 0.5s;
+        }
+        .showcase-main:hover::before { opacity: 0.8; }
+        .showcase-img img { width: 100%; }
+        .showcase-caption {
+            margin-top: 32px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 64px;
+        }
+        .showcase-caption h2 {
+            font-size: clamp(32px, 4vw, 48px);
+            font-weight: 700;
+            letter-spacing: -0.035em;
+            line-height: 1.1;
+        }
+        .showcase-caption p {
+            font-size: 16px;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            padding-top: 8px;
+        }
+
+        /* ---- Mobile showcase ---- */
+        .mobile-show {
+            padding: 0 0 160px;
+        }
+        .mobile-grid {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 64px;
+            align-items: center;
+        }
+        .phone-wrap {
+            position: relative;
+        }
+        .phone-wrap::before {
+            content: '';
+            position: absolute;
+            inset: -24px;
+            background: radial-gradient(ellipse, rgba(250,180,40,0.18) 0%, transparent 65%);
+            border-radius: 44px;
+            filter: blur(40px);
+            pointer-events: none;
+            opacity: 0.7;
+        }
+        .phone-frame {
+            position: relative;
+            background: #111113;
+            border-radius: 32px;
+            padding: 10px;
+            border: 2px solid rgba(255,255,255,0.1);
+            box-shadow: 0 32px 80px -16px rgba(0,0,0,0.5);
+        }
+        .phone-frame video {
+            width: 100%;
+            border-radius: 22px;
+            display: block;
+        }
+        .mobile-text h2 {
+            font-size: clamp(28px, 3.5vw, 40px);
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            line-height: 1.1;
+            margin-bottom: 14px;
+        }
+        .mobile-text p {
+            font-size: 16px;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            margin-bottom: 24px;
+            max-width: 420px;
+        }
+        .mobile-points {
+            list-style: none;
+        }
+        .mobile-points li {
+            font-size: 14px;
+            color: var(--text-secondary);
+            padding: 7px 0 7px 20px;
+            position: relative;
+        }
+        .mobile-points li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 14px;
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: var(--green);
+        }
+
+        /* ---- Feature Bento ---- */
+        .features {
+            padding: 0 0 160px;
+        }
+        .features-intro {
+            text-align: center;
+            margin-bottom: 56px;
+        }
+        .features-intro h2 {
+            font-size: clamp(32px, 4vw, 48px);
+            font-weight: 700;
+            letter-spacing: -0.035em;
+            margin-bottom: 12px;
+        }
+        .features-intro p {
+            font-size: 16px;
+            color: var(--text-secondary);
+            max-width: 440px;
+            margin: 0 auto;
+        }
+        .f-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: auto auto;
+            gap: 12px;
+        }
+        .f-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 36px 32px;
+            transition: border-color 0.3s, background 0.3s;
+            display: flex;
+            flex-direction: column;
+        }
+        .f-card:hover {
+            border-color: var(--border-hover);
+            background: var(--bg-card-hover);
+            box-shadow: 0 8px 32px -8px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.06);
+        }
+        .f-card h3 {
+            font-size: 20px;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            margin-bottom: 8px;
+        }
+        .f-card > p {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+        .f-card .f-img {
+            margin-top: auto;
+            padding-top: 24px;
+        }
+        .f-card .f-img {
+            position: relative;
+        }
+        .f-card .f-img img {
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.05);
+            width: 100%;
+            position: relative;
+        }
+        .f-card .f-img::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, transparent 50%, rgba(20,20,22,0.7) 100%);
+            pointer-events: none;
+            border-radius: 10px;
+        }
+        .f-card .f-metric {
+            font-size: 56px;
+            font-weight: 300;
+            letter-spacing: -0.04em;
+            margin-top: auto;
+            padding-top: 24px;
+            line-height: 1;
+        }
+        .f-card .f-metric span {
+            font-size: 20px;
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+
+        /* ---- Comparison ---- */
+        .compare {
+            padding: 0 0 160px;
+        }
+        .compare h2 {
+            font-size: 40px;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            text-align: center;
+            margin-bottom: 48px;
+        }
+        .compare-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background: var(--bg-card);
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+        .compare-table th,
+        .compare-table td {
+            padding: 16px 28px;
+            text-align: left;
+            font-size: 14px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .compare-table th {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+        .compare-table th:last-child { color: var(--accent); }
+        .compare-table td:first-child {
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        .compare-table tr:last-child td { border-bottom: none; }
+        .t-yes { color: var(--green); }
+        .t-no { color: var(--text-muted); }
+        .t-hl { color: var(--accent); font-weight: 600; }
+
+        /* ---- Testimonials ---- */
+        .social-proof {
+            padding: 0 0 160px;
+        }
+        .social-proof h2 {
+            font-size: 40px;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            text-align: center;
+            margin-bottom: 48px;
+        }
+        .reviews {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .review {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+            transition: border-color 0.3s;
+        }
+        .review:hover { border-color: var(--border-hover); }
+        .review-stars {
+            color: var(--accent);
+            font-size: 13px;
+            letter-spacing: 2px;
+            margin-bottom: 16px;
+        }
+        .review-text {
+            font-size: 15px;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            margin-bottom: 20px;
+        }
+        .review-author {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .review-av {
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            background: rgba(250,197,21,0.08);
+            border: 1px solid rgba(250,197,21,0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--accent);
+        }
+        .review-name {
+            font-size: 13px;
+            font-weight: 600;
+        }
+        .review-role {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        /* ---- Pricing ---- */
+        .pricing {
+            padding: 0 0 160px;
+        }
+        .pricing-head {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+        .pricing-head h2 {
+            font-size: 40px;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            margin-bottom: 12px;
+        }
+        .pricing-head p {
+            font-size: 16px;
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+        }
+        .billing-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+        .toggle {
+            width: 40px; height: 22px;
+            background: rgba(255,255,255,0.12);
+            border-radius: 11px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .toggle.on { background: var(--accent); }
+        .toggle::after {
+            content: '';
+            position: absolute;
+            width: 16px; height: 16px;
+            background: #fff;
+            border-radius: 50%;
+            top: 3px; left: 3px;
+            transition: transform 0.25s;
+        }
+        .toggle.on::after { transform: translateX(18px); }
+        .save-tag { color: var(--green); font-weight: 600; font-size: 12px; }
+        .p-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+        .p-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px 24px;
+            transition: all 0.3s;
+            position: relative;
+        }
+        .p-card:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-4px);
+            box-shadow: 0 16px 48px -8px rgba(0,0,0,0.4);
+        }
+        .p-card.pop {
+            border-color: rgba(250,197,21,0.25);
+            background: linear-gradient(180deg, rgba(250,197,21,0.03) 0%, var(--bg-card) 40%);
+        }
+        .p-card.pop::after {
+            content: 'Popular';
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--accent);
+            color: #000;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 14px;
+            border-radius: 100px;
+        }
+        .p-card-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+        .p-card.pop .p-card-name { color: var(--accent); }
+        .p-card-price {
+            font-size: 44px;
+            font-weight: 700;
+            letter-spacing: -0.04em;
+            line-height: 1;
+        }
+        .p-card-price span.unit {
+            font-size: 15px;
+            font-weight: 400;
+            color: var(--text-muted);
+        }
+        .p-card-annual {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 4px;
+            margin-bottom: 24px;
+            min-height: 20px;
+        }
+        .p-card ul { list-style: none; margin-bottom: 28px; }
+        .p-card li {
+            font-size: 13px;
+            color: var(--text-secondary);
+            padding: 5px 0;
+        }
+        .p-card-btn {
+            display: block;
+            width: 100%;
+            text-align: center;
+            padding: 11px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+        }
+        .p-card-btn:hover { border-color: var(--border-hover); color: var(--text); }
+        .p-card-btn.primary {
+            background: var(--accent);
+            border-color: transparent;
+            color: #000;
+        }
+        .p-card-btn.primary:hover {
+            background: var(--accent-dim);
+            box-shadow: 0 0 24px rgba(250,197,21,0.15);
+        }
+        .pricing-trust {
+            text-align: center;
+            margin-top: 28px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .trust-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+        .trust-item svg { flex-shrink: 0; }
+
+        /* ---- Closing CTA ---- */
+        .closing {
+            padding: 120px 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .closing::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 1000px;
+            height: 600px;
+            background: radial-gradient(ellipse, rgba(250,180,40,0.16) 0%, rgba(250,197,21,0.07) 40%, transparent 70%);
+            pointer-events: none;
+        }
+        .closing > * { position: relative; z-index: 1; }
+        .closing h2 {
+            font-size: clamp(36px, 5vw, 56px);
+            font-weight: 700;
+            letter-spacing: -0.04em;
+            line-height: 1.1;
+            margin-bottom: 16px;
+        }
+        .closing p {
+            font-size: 16px;
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+        }
+
+        /* ---- FAQ ---- */
+        .faq {
+            padding: 0 0 100px;
+        }
+        .faq h2 {
+            font-size: 32px;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .faq-item { border-bottom: 1px solid rgba(255,255,255,0.06); }
+        .faq-q {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            text-align: left;
+        }
+        .faq-q h4 { font-size: 15px; font-weight: 500; }
+        .faq-q:hover h4 { color: var(--text-secondary); }
+        .faq-chevron {
+            color: var(--text-muted);
+            transition: transform 0.3s;
+            flex-shrink: 0;
+            margin-left: 20px;
+            font-size: 18px;
+        }
+        .faq-item.open .faq-chevron { transform: rotate(45deg); }
+        .faq-a {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease;
+        }
+        .faq-item.open .faq-a { max-height: 200px; }
+        .faq-a p {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            padding-bottom: 20px;
+        }
+
+        /* ---- Footer ---- */
+        footer {
+            border-top: 1px solid rgba(255,255,255,0.06);
+            padding: 40px 0;
+        }
+        .footer-disclaimer {
+            font-size: 11px;
+            color: var(--text-muted);
+            line-height: 1.7;
+            text-align: center;
+            margin-bottom: 24px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+        }
+        .footer-disclaimer a {
+            color: var(--text-secondary);
+            text-decoration: underline;
+            text-underline-offset: 2px;
+        }
+        .footer-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        .footer-links { display: flex; gap: 20px; }
+        .footer-links a {
+            color: var(--text-muted);
+            transition: color 0.2s;
+        }
+        .footer-links a:hover { color: var(--text-secondary); }
+
+        /* ---- Sticky bar ---- */
+        .sticky {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(12,12,14,0.92);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-top: 1px solid rgba(255,255,255,0.06);
+            padding: 10px 0;
+            z-index: 90;
+            transform: translateY(100%);
+            transition: transform 0.3s;
+        }
+        .sticky.on { transform: translateY(0); }
+        .sticky-inner {
+            max-width: 1120px;
+            margin: 0 auto;
+            padding: 0 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .sticky-text { font-size: 14px; color: var(--text-secondary); }
+        .sticky-text strong { color: var(--text); }
+        .sticky-btn {
+            background: var(--accent);
+            color: #000;
+            padding: 8px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        .sticky-btn:hover { background: var(--accent-dim); }
+
+        /* ---- Floating particles + orbs ---- */
+        .atmosphere {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+            background:
+                radial-gradient(ellipse at 15% 0%, rgba(180,80,20,0.28) 0%, rgba(140,50,10,0.14) 25%, transparent 55%),
+                radial-gradient(ellipse at 85% 5%, rgba(200,100,15,0.22) 0%, rgba(160,70,10,0.1) 25%, transparent 55%),
+                radial-gradient(ellipse at 50% 0%, rgba(250,180,40,0.18) 0%, rgba(200,140,30,0.08) 30%, transparent 60%),
+                radial-gradient(ellipse at 0% 50%, rgba(180,80,20,0.12) 0%, transparent 40%),
+                radial-gradient(ellipse at 100% 40%, rgba(200,100,20,0.1) 0%, transparent 40%);
+        }
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(90px);
+            opacity: 0;
+            animation: drift 18s ease-in-out infinite;
+        }
+        .orb-1 {
+            width: 650px; height: 650px;
+            background: radial-gradient(circle, rgba(250,150,30,0.25) 0%, rgba(200,80,15,0.15) 50%, transparent 70%);
+            top: -5%; left: -8%;
+            animation-delay: 0s;
+        }
+        .orb-2 {
+            width: 500px; height: 500px;
+            background: radial-gradient(circle, rgba(250,180,40,0.2) 0%, rgba(220,120,20,0.12) 50%, transparent 70%);
+            top: 40%; right: -8%;
+            animation-delay: -6s;
+        }
+        .orb-3 {
+            width: 550px; height: 550px;
+            background: radial-gradient(circle, rgba(200,100,20,0.15) 0%, rgba(180,80,15,0.08) 50%, transparent 70%);
+            bottom: 5%; left: 25%;
+            animation-delay: -12s;
+        }
+        @keyframes drift {
+            0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.7; }
+            25% { transform: translate(30px, -40px) scale(1.1); opacity: 0.9; }
+            50% { transform: translate(-20px, 20px) scale(0.95); opacity: 0.6; }
+            75% { transform: translate(40px, 30px) scale(1.05); opacity: 0.85; }
+        }
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(250,180,40,0.7);
+            box-shadow: 0 0 8px rgba(250,160,30,0.4);
+            animation: rise linear infinite;
+        }
+        @keyframes rise {
+            0% { transform: translateY(0) scale(0); opacity: 0; }
+            10% { opacity: 0.9; transform: translateY(-10vh) scale(1); }
+            90% { opacity: 0.3; }
+            100% { transform: translateY(-110vh) scale(0.5); opacity: 0; }
+        }
+
+        /* ---- Animations ---- */
+        .reveal {
+            opacity: 0;
+            transform: translateY(32px);
+            transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .reveal.in { opacity: 1; transform: none; }
+        .reveal-d1 { transition-delay: 0.08s; }
+        .reveal-d2 { transition-delay: 0.16s; }
+        .reveal-d3 { transition-delay: 0.24s; }
+
+        /* ---- Responsive ---- */
+        @media (max-width: 960px) {
+            .hero-grid { grid-template-columns: 1fr; gap: 48px; }
+            .hero-text h1 { font-size: 40px; }
+            .steps-row { grid-template-columns: 1fr; }
+            .step { border-right: none; border-bottom: 1px solid var(--border); }
+            .step:last-child { border-bottom: none; }
+            .showcase-caption { grid-template-columns: 1fr; gap: 16px; }
+            .mobile-grid { grid-template-columns: 1fr; gap: 40px; text-align: center; }
+            .phone-wrap { max-width: 220px; margin: 0 auto; }
+            .mobile-text p, .mobile-points { text-align: left; }
+            .f-grid { grid-template-columns: 1fr; }
+            .p-grid { grid-template-columns: 1fr 1fr; }
+            .reviews { grid-template-columns: 1fr; }
+            .hdr-nav .nav-hide { display: none; }
+        }
+        @media (max-width: 600px) {
+            .hero-text h1 { font-size: 34px; }
+            .hero { padding: 120px 0 48px; }
+            .hero-actions { flex-direction: column; align-items: stretch; }
+            .p-grid { grid-template-columns: 1fr; max-width: 360px; margin: 0 auto; }
+            .w, .w-narrow, .w-wide { padding: 0 20px; }
+            .hdr-inner { padding: 12px 20px; }
+            .sticky-text { display: none; }
+            .footer-row { flex-direction: column; gap: 12px; text-align: center; }
+            .footer-links { flex-wrap: wrap; justify-content: center; }
+            .hero-social { flex-direction: column; gap: 4px; }
+            .pricing-trust { flex-direction: column; align-items: center; gap: 10px; }
+            .cta { min-height: 48px; justify-content: center; }
+            .btn-ghost { min-height: 48px; justify-content: center; }
+            .compare-table th, .compare-table td { padding: 10px 12px; font-size: 12px; }
+            .compare h2 { font-size: 28px; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .reveal { opacity: 1; transform: none; transition: none; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Atmosphere: orbs + particles -->
+<div class="atmosphere" id="atmosphere">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+</div>
+
+<!-- PROMO -->
+<div class="promo" id="promo">
+    <strong>NLHE Just Launched</strong> · 10% off your first month
+    <span class="promo-code">NLHELAUNCH</span>
+    <button class="promo-x" id="promo-x">&times;</button>
+</div>
+
+<!-- HEADER -->
+<header class="hdr has-promo" id="hdr">
+    <div class="hdr-inner">
+        <a href="https://flophero.com"><img src="images/logo-on-dark-alt.png" alt="FlopHero" class="hdr-logo"></a>
+        <nav class="hdr-nav">
+            <a href="#features" class="nav-hide">Features</a>
+            <a href="#pricing" class="nav-hide">Pricing</a>
+            <a href="#faq" class="nav-hide">FAQ</a>
+            <a href="https://flophero.com" class="hdr-cta">Start Free</a>
+        </nav>
+    </div>
+</header>
+
+
+<!-- ============================================= -->
+<!-- HERO                                          -->
+<!-- ============================================= -->
+<section class="hero">
+    <div class="w">
+        <div class="hero-grid">
+            <div class="hero-text">
+                <h1 class="reveal">You Know You Have Leaks.<br>Now See <em>Which Ones</em>.</h1>
+                <p class="hero-sub reveal reveal-d1">
+                    Automated analysis ranks every Hold'em mistake by <strong>how much it costs you</strong>. No hand review. No setup. Open the app and see what's hurting your winrate.
+                </p>
+                <div class="hero-actions reveal reveal-d2">
+                    <a href="https://flophero.com" class="cta">
+                        Start Free
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3L11 8L6 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </a>
+                    <a href="#features" class="btn-ghost">See How It Works</a>
+                </div>
+                <div class="hero-trust reveal reveal-d3">No credit card <span>·</span> 10 hands/day free <span>·</span> Browser-based</div>
+                <div class="hero-social reveal reveal-d3">
+                    <span class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+                    <q>Cuts out the guesswork entirely</q>
+                    <cite>PLO365</cite>
+                </div>
+            </div>
+            <div class="hero-visual reveal reveal-d1" data-tilt="5">
+                <div class="hero-visual-inner">
+                    <video autoplay muted loop playsinline poster="images/hero-solver-v2.png">
+                        <source src="images/flophero-demo.mp4" type="video/mp4">
+                    </video>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================= -->
+<!-- STEPS                                         -->
+<!-- ============================================= -->
+<section class="steps">
+    <div class="w">
+        <div class="steps-row">
+            <div class="step reveal">
+                <div class="step-n">01</div>
+                <h3>Connect</h3>
+                <p>Link the Live Tracker to your poker client. Hands import automatically as you play.</p>
+            </div>
+            <div class="step reveal reveal-d1">
+                <div class="step-n">02</div>
+                <h3>Analyze</h3>
+                <p>Automated analysis ranks every mistake by EV loss. No manual uploads, no tree building.</p>
+            </div>
+            <div class="step reveal reveal-d2">
+                <div class="step-n">03</div>
+                <h3>Improve</h3>
+                <p>Study the GTO solution for each leak. Train on similar spots. Track progress over time.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================= -->
+<!-- SHOWCASE                                      -->
+<!-- ============================================= -->
+<section class="showcase">
+    <div class="w-wide">
+        <div class="showcase-main reveal">
+            <div class="showcase-img" data-tilt="3">
+                <img src="images/strategies-view.jpg" alt="FlopHero GTO solver strategies view" loading="lazy">
+            </div>
+        </div>
+    </div>
+    <div class="w">
+        <div class="showcase-caption">
+            <h2 class="reveal">Every leak,<br>ranked by cost</h2>
+            <p class="reveal reveal-d1">FlopHero analyzes your hands automatically and tells you exactly which mistakes cost the most money. Mistakes you didn't know existed, quantified in EV lost per hand. No more guessing what to study next.</p>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================= -->
+<!-- MOBILE                                        -->
+<!-- ============================================= -->
+<section class="mobile-show">
+    <div class="w">
+        <div class="mobile-grid">
+            <div class="phone-wrap reveal">
+                <div class="phone-frame" data-tilt="4">
+                    <video autoplay muted loop playsinline>
+                        <source src="images/flophero-demo-vertical.mp4" type="video/mp4">
+                    </video>
+                </div>
+            </div>
+            <div class="mobile-text">
+                <h2 class="reveal">Study anywhere.<br>No downloads.</h2>
+                <p class="reveal reveal-d1">FlopHero runs entirely in your browser. Phone, tablet, or desktop. Open a hand, study the GTO solution, practice on your commute.</p>
+                <ul class="mobile-points reveal reveal-d2">
+                    <li>Chrome, Safari, Firefox, Edge</li>
+                    <li>No app install required</li>
+                    <li>Full solver on mobile</li>
+                    <li>Same account, any device</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================= -->
+<!-- FEATURES                                      -->
+<!-- ============================================= -->
+<section class="features" id="features">
+    <div class="w">
+        <div class="features-intro reveal">
+            <h2>Everything you need.<br>Nothing you don't.</h2>
+            <p>Every tool included on every plan. No feature gating.</p>
+        </div>
+
+        <div class="f-grid">
+            <div class="f-card reveal">
+                <h3>GTO Trainer</h3>
+                <p>Practice GTO decisions on a realistic poker table. Instant feedback shows how much EV you left behind on every hand.</p>
+                <div class="f-img">
+                    <img src="images/screenshot-trainer-table.png" alt="FlopHero trainer" loading="lazy">
+                </div>
+            </div>
+            <div class="f-card reveal reveal-d1">
+                <h3>Interactive Ranges</h3>
+                <p>13x13 matrix with color-coded frequencies. Filter by position, action, and street.</p>
+                <div class="f-img">
+                    <img src="images/screenshot-range-splits.png" alt="FlopHero ranges" loading="lazy">
+                </div>
+            </div>
+            <div class="f-card reveal">
+                <h3>GTO Replayer</h3>
+                <p>Upload any hand and replay it against the GTO solution. See exactly where you deviated and how much it cost.</p>
+                <div class="f-img">
+                    <img src="images/gto-replayer.jpg" alt="FlopHero GTO Replayer" loading="lazy">
+                </div>
+            </div>
+            <div class="f-card reveal reveal-d1">
+                <h3>Session Tracking</h3>
+                <p>Monitor EV, accuracy trends, and biggest leaks over time. See your progress session by session.</p>
+                <div class="f-img">
+                    <img src="images/sessions-dashboard-new.png" alt="FlopHero sessions dashboard" loading="lazy">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================= -->
+<!-- COMPARISON                                    -->
+<!-- ============================================= -->
+<section class="compare">
+    <div class="w-narrow">
+        <h2 class="reveal">FlopHero vs GTO Wizard</h2>
+        <div class="reveal reveal-d1">
+            <table class="compare-table">
+                <thead>
+                    <tr><th></th><th>GTO Wizard</th><th>FlopHero</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Starting price</td><td>$39/mo</td><td class="t-hl">$50/mo</td></tr>
+                    <tr><td>Feature gating</td><td class="t-no">Yes (tiered)</td><td class="t-yes">None</td></tr>
+                    <tr><td>River solve speed</td><td>Varies</td><td class="t-hl">2-4 sec</td></tr>
+                    <tr><td>Hand import</td><td>Manual</td><td class="t-yes">Automatic</td></tr>
+                    <tr><td>Leak ranking by EV</td><td class="t-no">No</td><td class="t-yes">Yes</td></tr>
+                    <tr><td>Tree building</td><td>Required</td><td class="t-yes">Not needed</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================= -->
+<!-- TESTIMONIALS                                  -->
+<!-- ============================================= -->
+<section class="social-proof">
+    <div class="w">
+        <h2 class="reveal">What players are saying</h2>
+        <div class="reviews">
+            <div class="review reveal">
+                <div class="review-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+                <div class="review-text">"The first study tool that truly cuts out the guesswork. It analyzes real hands instantly, highlights real leaks, and gives real GTO solutions without any manual setup."</div>
+                <div class="review-author">
+                    <div class="review-av">P</div>
+                    <div>
+                        <div class="review-name">PLO365 Review</div>
+                        <div class="review-role">Independent Review, 2025</div>
+                    </div>
+                </div>
+            </div>
+            <div class="review reveal reveal-d1">
+                <div class="review-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+                <div class="review-text">"The EV ranking showed me leaks I knew existed but seeing them quantified made them impossible to ignore. Clear map of what to work on."</div>
+                <div class="review-author">
+                    <div class="review-av">M</div>
+                    <div>
+                        <div class="review-name">Mid-Stakes Player</div>
+                        <div class="review-role">$0.50/$1 to $1/$2</div>
+                    </div>
+                </div>
+            </div>
+            <div class="review reveal">
+                <div class="review-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+                <div class="review-text">"Every board had a real solution, every turn and river flowing cleanly from the flop strategy. No weird gaps, no approximations."</div>
+                <div class="review-author">
+                    <div class="review-av">W</div>
+                    <div>
+                        <div class="review-name">WorldPokerDeals</div>
+                        <div class="review-role">Software Review, 2025</div>
+                    </div>
+                </div>
+            </div>
+            <div class="review reveal reveal-d1">
+                <div class="review-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+                <div class="review-text">"Removes the filtering, the manual work, the hours of hunting for useful hands. Ready-to-study answers seconds after finishing playing."</div>
+                <div class="review-author">
+                    <div class="review-av">G</div>
+                    <div>
+                        <div class="review-name">GipsyTeam Review</div>
+                        <div class="review-role">Poker Community, 2025</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================= -->
+<!-- PRICING                                       -->
+<!-- ============================================= -->
+<section class="pricing" id="pricing">
+    <div class="w">
+        <div class="pricing-head reveal">
+            <h2>All features. Every plan.</h2>
+            <p>Choose based on the stakes you play. 25% off annual.</p>
+            <div class="billing-toggle">
+                <span>Monthly</span>
+                <div class="toggle" id="billing-toggle"></div>
+                <span>Annual</span>
+                <span class="save-tag">Save 25%</span>
+            </div>
+        </div>
+
+        <div class="p-grid">
+            <div class="p-card reveal">
+                <div class="p-card-name">Free</div>
+                <div class="p-card-price">$0<span class="unit">/mo</span></div>
+                <div class="p-card-annual">&nbsp;</div>
+                <ul>
+                    <li>10 hands per day</li>
+                    <li>All features</li>
+                    <li>GTO Library + Solver</li>
+                </ul>
+                <a href="https://flophero.com" class="p-card-btn">Start Free</a>
+            </div>
+            <div class="p-card reveal reveal-d1">
+                <div class="p-card-name">Low Stakes</div>
+                <div class="p-card-price">$<span class="pv">50</span><span class="unit">/mo</span></div>
+                <div class="p-card-annual"><span class="pa">$37.50/mo annually</span></div>
+                <ul>
+                    <li>Up to $0.25/$0.50</li>
+                    <li>Unlimited hands</li>
+                    <li>All features</li>
+                </ul>
+                <a href="https://flophero.com" class="p-card-btn">Choose Plan</a>
+            </div>
+            <div class="p-card pop reveal reveal-d2">
+                <div class="p-card-name">Mid Stakes</div>
+                <div class="p-card-price">$<span class="pv">100</span><span class="unit">/mo</span></div>
+                <div class="p-card-annual"><span class="pa">$75/mo annually</span></div>
+                <ul>
+                    <li>Up to $2/$4</li>
+                    <li>Unlimited hands</li>
+                    <li>All features</li>
+                </ul>
+                <a href="https://flophero.com" class="p-card-btn primary">Choose Plan</a>
+            </div>
+            <div class="p-card reveal reveal-d3">
+                <div class="p-card-name">High Stakes</div>
+                <div class="p-card-price">$<span class="pv">200</span><span class="unit">/mo</span></div>
+                <div class="p-card-annual"><span class="pa">$150/mo annually</span></div>
+                <ul>
+                    <li>All stakes</li>
+                    <li>Unlimited hands</li>
+                    <li>All features</li>
+                </ul>
+                <a href="https://flophero.com" class="p-card-btn">Choose Plan</a>
+            </div>
+        </div>
+
+        <div class="pricing-trust reveal">
+            <div class="trust-item">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1L10 5.5L15 6L11.5 9.5L12.5 14.5L8 12L3.5 14.5L4.5 9.5L1 6L6 5.5L8 1Z" fill="#fac515"/></svg>
+                7-day money-back guarantee
+            </div>
+            <div class="trust-item">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M13.3 4.7L6.5 11.5L2.7 7.7" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Cancel anytime
+            </div>
+            <div class="trust-item">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1.33V8L11.33 9.67M14.67 8A6.67 6.67 0 1 1 1.33 8a6.67 6.67 0 0 1 13.34 0Z" stroke="#8a8a8a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Upgrade or downgrade anytime
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================= -->
+<!-- CLOSING CTA                                   -->
+<!-- ============================================= -->
+<section class="closing">
+    <div class="w">
+        <h2 class="reveal">Stop guessing.<br>Start seeing.</h2>
+        <p class="reveal reveal-d1">Free to start. No credit card. Browser-based.</p>
+        <a href="https://flophero.com" class="cta reveal reveal-d2">
+            Start Free
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3L11 8L6 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+    </div>
+</section>
+
+
+<!-- ============================================= -->
+<!-- FAQ                                           -->
+<!-- ============================================= -->
+<section class="faq" id="faq">
+    <div class="w-narrow">
+        <h2 class="reveal">Questions</h2>
+        <div class="reveal">
+            <div class="faq-item">
+                <button class="faq-q"><h4>What's included in the free plan?</h4><span class="faq-chevron">+</span></button>
+                <div class="faq-a"><p>10 hands per day with full access to every feature. GTO Library, Solver, Trainer, Ranges, Session Tracking. Nothing gated.</p></div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-q"><h4>How is this different from GTO Wizard?</h4><span class="faq-chevron">+</span></button>
+                <div class="faq-a"><p>FlopHero finds mistakes automatically and ranks them by EV cost. No manual uploads, no tree building. Every feature included on every plan.</p></div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-q"><h4>Why are plans based on stakes?</h4><span class="faq-chevron">+</span></button>
+                <div class="faq-a"><p>Because feature-gating punishes players who want to improve. Every plan includes every tool. You pay proportional to your game's value, not for artificial access tiers.</p></div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-q"><h4>How fast are the solvers?</h4><span class="faq-chevron">+</span></button>
+                <div class="faq-a"><p>Flop and turn solutions load instantly from the pre-calculated library. River solves complete in 2-3 seconds.</p></div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-q"><h4>Can I import hands automatically?</h4><span class="faq-chevron">+</span></button>
+                <div class="faq-a"><p>Yes. The Live Tracker imports hands from major poker clients as you play. No manual uploads needed.</p></div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-q"><h4>Refund policy?</h4><span class="faq-chevron">+</span></button>
+                <div class="faq-a"><p>7-day refund guarantee on all paid plans. No questions asked.</p></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================= -->
+<!-- FOOTER                                        -->
+<!-- ============================================= -->
+<footer>
+    <div class="w">
+        <div class="footer-disclaimer">
+            FlopHero is a poker study platform for adult users (18+). It does not offer real money gambling or simulate gambling. Strictly educational. If you or someone you know has a gambling problem, visit <a href="https://www.ncpgambling.org" target="_blank" rel="noopener">ncpgambling.org</a>.
+        </div>
+        <div class="footer-row">
+            <span>&copy; 2026 Algo Software DMCC</span>
+            <div class="footer-links">
+                <a href="#pricing">Pricing</a>
+                <a href="https://flophero.com/knowledge">Knowledge Hub</a>
+                <a href="https://flophero.com/about">About</a>
+                <a href="https://flophero.com/privacy">Privacy</a>
+                <a href="https://flophero.com/terms">Terms</a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- Sticky CTA -->
+<div class="sticky" id="sticky">
+    <div class="sticky-inner">
+        <span class="sticky-text"><strong>FlopHero NLHE</strong> · See where you're losing money</span>
+        <a href="https://flophero.com" class="sticky-btn">Start Free &rarr;</a>
+    </div>
+</div>
+
+<script>
+(function(){
+    'use strict';
+
+    // Promo banner
+    const promo = document.getElementById('promo');
+    const hdr = document.getElementById('hdr');
+    document.getElementById('promo-x').addEventListener('click', () => {
+        promo.style.display = 'none';
+        hdr.classList.remove('has-promo');
+    });
+
+    // Tilt
+    document.querySelectorAll('[data-tilt]').forEach(el => {
+        const i = +el.dataset.tilt || 6;
+        let h = false;
+        el.addEventListener('mousemove', e => {
+            const r = el.getBoundingClientRect();
+            const rx = ((e.clientY - r.top - r.height/2) / (r.height/2)) * -i;
+            const ry = ((e.clientX - r.left - r.width/2) / (r.width/2)) * i;
+            el.style.transform = `perspective(800px) rotateX(${rx}deg) rotateY(${ry}deg)`;
+            el.style.transition = h ? 'none' : 'transform .1s';
+            h = true;
+        });
+        el.addEventListener('mouseleave', () => {
+            el.style.transform = '';
+            el.style.transition = 'transform .5s ease-out';
+            h = false;
+        });
+    });
+
+    // CTA glow
+    document.querySelectorAll('.cta').forEach(b => {
+        b.addEventListener('mousemove', e => {
+            const r = b.getBoundingClientRect();
+            b.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+            b.style.setProperty('--my', (e.clientY - r.top) + 'px');
+        });
+    });
+
+    // Reveal
+    const io = new IntersectionObserver(entries => {
+        entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }});
+    }, { threshold: 0.12, rootMargin: '0px 0px -60px 0px' });
+    document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+    // FAQ
+    document.querySelectorAll('.faq-q').forEach(b => {
+        b.addEventListener('click', () => {
+            const it = b.parentElement;
+            const open = it.classList.contains('open');
+            document.querySelectorAll('.faq-item').forEach(f => f.classList.remove('open'));
+            if (!open) it.classList.add('open');
+        });
+    });
+
+    // Billing toggle
+    const toggle = document.getElementById('billing-toggle');
+    let annual = false;
+    const prices = { monthly: [50, 100, 200], annual: [37.50, 75, 150] };
+
+    toggle.addEventListener('click', () => {
+        annual = !annual;
+        toggle.classList.toggle('on', annual);
+        document.querySelectorAll('.pv').forEach((el, i) => {
+            const v = annual ? prices.annual[i] : prices.monthly[i];
+            el.textContent = v % 1 === 0 ? v : v.toFixed(2);
+        });
+        document.querySelectorAll('.pa').forEach(el => {
+            el.style.opacity = annual ? '0.5' : '1';
+        });
+    });
+
+    // Sticky + header + promo offset
+    const s = document.getElementById('sticky');
+    const promoH = promo.offsetHeight;
+    window.addEventListener('scroll', () => {
+        s.classList.toggle('on', scrollY > 700);
+        hdr.classList.toggle('scrolled', scrollY > 60);
+        // Remove promo offset when banner scrolls out of view
+        if (scrollY >= promoH && hdr.classList.contains('has-promo')) {
+            hdr.style.top = '0';
+        } else if (hdr.classList.contains('has-promo')) {
+            hdr.style.top = (promoH - scrollY) + 'px';
+        }
+    }, { passive: true });
+
+    // Smooth scroll
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+        a.addEventListener('click', function(e) {
+            e.preventDefault();
+            const t = document.querySelector(this.getAttribute('href'));
+            if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+    });
+
+    // Floating particles
+    const atm = document.getElementById('atmosphere');
+    function spawnParticle() {
+        const p = document.createElement('div');
+        p.classList.add('particle');
+        const size = 2 + Math.random() * 4;
+        const left = Math.random() * 100;
+        const dur = 8 + Math.random() * 12;
+        const delay = Math.random() * 2;
+        p.style.cssText = `width:${size}px;height:${size}px;left:${left}%;bottom:-10px;animation-duration:${dur}s;animation-delay:${delay}s;`;
+        atm.appendChild(p);
+        setTimeout(() => p.remove(), (dur + delay) * 1000);
+    }
+    for (let i = 0; i < 12; i++) setTimeout(spawnParticle, i * 400);
+    setInterval(spawnParticle, 2500);
+})();
+</script>
+</body>
+</html>

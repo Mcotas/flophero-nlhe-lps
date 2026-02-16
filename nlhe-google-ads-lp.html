@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="FlopHero shows you exactly which Hold'em mistakes cost the most. Automated leak detection. Free to start.">
+    <title>FlopHero | See Where You're Losing Money</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg: #0c0c0e;
+            --bg-card: #141416;
+            --bg-card-hover: #1a1a1e;
+            --border: rgba(255,255,255,0.08);
+            --border-hover: rgba(255,255,255,0.14);
+            --text: #f0f0f0;
+            --text-secondary: #8a8a8a;
+            --text-muted: #555;
+            --accent: #fac515;
+            --accent-dim: #e5b413;
+            --green: #34d399;
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            overflow-x: hidden;
+            line-height: 1.5;
+        }
+
+        /* Subtle noise grain texture */
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+            background-repeat: repeat;
+            background-size: 256px;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.4;
+            mix-blend-mode: overlay;
+        }
+
+        ::selection { background: rgba(250,197,21,0.2); }
+        a { color: inherit; text-decoration: none; }
+        img { max-width: 100%; display: block; }
+        button { border: none; background: none; cursor: pointer; font: inherit; color: inherit; }
+
+        /* ---- Layout ---- */
+        .w { max-width: 1120px; margin: 0 auto; padding: 0 32px; }
+        .w-narrow { max-width: 800px; margin: 0 auto; padding: 0 32px; }
+
+        /* ---- Hero ---- */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 100px 32px 60px;
+            position: relative;
+            overflow: hidden;
+        }
+        /* Ambient glow behind hero */
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 1400px;
+            height: 900px;
+            background: radial-gradient(ellipse, rgba(250,160,30,0.3) 0%, rgba(220,120,20,0.16) 25%, rgba(180,80,15,0.08) 50%, transparent 75%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        .hero > * { position: relative; z-index: 1; }
+        .hero-logo { height: 28px; margin-bottom: 48px; opacity: 0.9; }
+        .hero h1 {
+            font-size: clamp(40px, 6vw, 72px);
+            font-weight: 700;
+            line-height: 1.05;
+            letter-spacing: -0.04em;
+            max-width: 780px;
+            margin-bottom: 20px;
+        }
+        .hero h1 em {
+            font-style: normal;
+            color: var(--accent);
+        }
+        .hero-sub {
+            font-size: 18px;
+            font-weight: 400;
+            color: var(--text-secondary);
+            max-width: 480px;
+            margin-bottom: 36px;
+            line-height: 1.6;
+        }
+        .cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--accent);
+            color: #000;
+            padding: 16px 36px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.25s;
+            position: relative;
+            overflow: hidden;
+        }
+        .cta:hover {
+            background: var(--accent-dim);
+            box-shadow: 0 0 40px rgba(250,197,21,0.2);
+            transform: translateY(-1px);
+        }
+        .cta:active { transform: scale(0.98); }
+        .cta svg { transition: transform 0.2s; }
+        .cta:hover svg { transform: translateX(3px); }
+        /* glow follow */
+        .cta::before {
+            content: '';
+            position: absolute;
+            width: 100px; height: 100px;
+            background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);
+            border-radius: 50%;
+            transform: translate(-50%,-50%);
+            left: var(--mx, -100px);
+            top: var(--my, -100px);
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+        .cta:hover::before { opacity: 1; }
+        .hero-trust {
+            margin-top: 14px;
+            font-size: 13px;
+            color: var(--text-muted);
+            letter-spacing: 0.01em;
+        }
+        .hero-trust span { margin: 0 6px; }
+        .hero-social {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+        .hero-social .stars {
+            color: var(--accent);
+            font-size: 12px;
+            letter-spacing: 1px;
+        }
+        .hero-social q {
+            font-style: italic;
+            quotes: none;
+        }
+        .hero-social cite {
+            font-style: normal;
+            color: var(--text-muted);
+        }
+
+        /* Hero visual */
+        .hero-media {
+            margin-top: 64px;
+            width: 100%;
+            max-width: 960px;
+            position: relative;
+        }
+        /* Glow behind video */
+        .hero-media::before {
+            content: '';
+            position: absolute;
+            inset: -36px;
+            background: radial-gradient(ellipse at center, rgba(250,180,40,0.24) 0%, rgba(250,197,21,0.12) 40%, transparent 70%);
+            border-radius: 28px;
+            filter: blur(44px);
+            pointer-events: none;
+            transition: opacity 0.6s;
+            opacity: 0.85;
+        }
+        .hero-media:hover::before { opacity: 0.9; }
+        .hero-media-inner {
+            position: relative;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            box-shadow: 0 32px 80px -16px rgba(0,0,0,0.6);
+            transform-style: preserve-3d;
+        }
+        .hero-media video {
+            width: 100%;
+            display: block;
+        }
+
+        /* ---- Product section (asymmetric) ---- */
+        .product {
+            padding: 140px 0;
+        }
+        .product-grid {
+            display: grid;
+            grid-template-columns: 1.3fr 1fr;
+            gap: 64px;
+            align-items: center;
+        }
+        .product-visual {
+            position: relative;
+            transform-style: preserve-3d;
+        }
+        /* Glow behind product screenshot */
+        .product-visual::before {
+            content: '';
+            position: absolute;
+            inset: -28px;
+            background: radial-gradient(ellipse, rgba(250,180,40,0.2) 0%, transparent 65%);
+            border-radius: 24px;
+            filter: blur(36px);
+            pointer-events: none;
+            opacity: 0.75;
+            transition: opacity 0.5s;
+        }
+        .product-visual:hover::before { opacity: 0.8; }
+        .product-visual img {
+            position: relative;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            box-shadow: 0 24px 64px -16px rgba(0,0,0,0.5);
+            transition: all 0.5s;
+        }
+        .product-visual:hover img {
+            border-color: var(--border-hover);
+            box-shadow: 0 24px 64px -16px rgba(250,197,21,0.12);
+        }
+        .product-text h2 {
+            font-size: 40px;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            line-height: 1.1;
+            margin-bottom: 16px;
+        }
+        .product-text p {
+            font-size: 16px;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            margin-bottom: 24px;
+        }
+        .product-points {
+            list-style: none;
+        }
+        .product-points li {
+            font-size: 15px;
+            color: var(--text-secondary);
+            padding: 8px 0;
+            padding-left: 20px;
+            position: relative;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+        }
+        .product-points li:last-child { border-bottom: none; }
+        .product-points li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 16px;
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: var(--green);
+        }
+
+        /* ---- Bento grid ---- */
+        .bento {
+            padding: 0 0 140px;
+        }
+        .bento-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-rows: auto auto;
+            gap: 12px;
+        }
+        .bento-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 36px 32px;
+            transition: border-color 0.3s, background 0.3s;
+        }
+        .bento-card:hover {
+            border-color: var(--border-hover);
+            background: var(--bg-card-hover);
+            box-shadow: 0 8px 32px -8px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.06);
+        }
+        .bento-card.wide {
+            grid-column: span 2;
+        }
+        .bento-card.tall {
+            grid-row: span 2;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .bento-phone {
+            margin-top: 20px;
+            position: relative;
+        }
+        .bento-phone::before {
+            content: '';
+            position: absolute;
+            inset: -16px;
+            background: radial-gradient(ellipse, rgba(250,180,40,0.15) 0%, transparent 65%);
+            border-radius: 32px;
+            filter: blur(28px);
+            pointer-events: none;
+            opacity: 0.6;
+        }
+        .bento-phone-frame {
+            position: relative;
+            background: #111113;
+            border-radius: 24px;
+            padding: 6px;
+            border: 1.5px solid rgba(255,255,255,0.1);
+            max-width: 200px;
+            margin: 0 auto;
+        }
+        .bento-phone-frame video {
+            width: 100%;
+            border-radius: 18px;
+            display: block;
+        }
+        .bento-card h3 {
+            font-size: 20px;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            margin-bottom: 8px;
+        }
+        .bento-card p {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+        .bento-card .bento-metric {
+            font-size: 48px;
+            font-weight: 300;
+            letter-spacing: -0.04em;
+            color: var(--text);
+            margin-top: 20px;
+            line-height: 1;
+        }
+        .bento-card .bento-metric span {
+            font-size: 18px;
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+        .bento-img {
+            margin-top: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.05);
+            position: relative;
+        }
+        .bento-img::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, transparent 60%, rgba(20,20,22,0.8) 100%);
+            pointer-events: none;
+            border-radius: 10px;
+        }
+        .bento-img img {
+            width: 100%;
+        }
+
+        /* ---- Comparison (minimal) ---- */
+        .compare {
+            padding: 0 0 140px;
+        }
+        .compare h2 {
+            font-size: 40px;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            text-align: center;
+            margin-bottom: 48px;
+        }
+        .compare-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background: var(--bg-card);
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+        .compare-table th,
+        .compare-table td {
+            padding: 16px 28px;
+            text-align: left;
+            font-size: 14px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .compare-table th {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+        .compare-table th:last-child {
+            color: var(--accent);
+        }
+        .compare-table td:first-child {
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        .compare-table tr:last-child td { border-bottom: none; }
+        .t-yes { color: var(--green); }
+        .t-no { color: var(--text-muted); }
+        .t-hl { color: var(--accent); font-weight: 600; }
+
+        /* ---- Pricing ---- */
+        .pricing {
+            padding: 0 0 140px;
+        }
+        .pricing h2 {
+            font-size: 40px;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            text-align: center;
+            margin-bottom: 12px;
+        }
+        .pricing > .w > p {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 16px;
+            margin-bottom: 48px;
+        }
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+        .p-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px 24px;
+            transition: all 0.3s;
+            position: relative;
+        }
+        .p-card:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-4px);
+            box-shadow: 0 16px 48px -8px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.06);
+        }
+        .p-card.pop {
+            border-color: rgba(250,197,21,0.25);
+            background: linear-gradient(180deg, rgba(250,197,21,0.03) 0%, var(--bg-card) 40%);
+        }
+        .p-card.pop::after {
+            content: 'Popular';
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--accent);
+            color: #000;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 14px;
+            border-radius: 100px;
+        }
+        .p-card-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+        .p-card.pop .p-card-name { color: var(--accent); }
+        .p-card-price {
+            font-size: 44px;
+            font-weight: 700;
+            letter-spacing: -0.04em;
+            line-height: 1;
+        }
+        .p-card-price span {
+            font-size: 15px;
+            font-weight: 400;
+            color: var(--text-muted);
+        }
+        .p-card-annual {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 4px;
+            margin-bottom: 24px;
+            min-height: 20px;
+        }
+        .p-card ul {
+            list-style: none;
+            margin-bottom: 28px;
+        }
+        .p-card li {
+            font-size: 13px;
+            color: var(--text-secondary);
+            padding: 5px 0;
+        }
+        .p-card-btn {
+            display: block;
+            width: 100%;
+            text-align: center;
+            padding: 11px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+        }
+        .p-card-btn:hover { border-color: var(--border-hover); color: var(--text); }
+        .p-card-btn.primary {
+            background: var(--accent);
+            border-color: transparent;
+            color: #000;
+        }
+        .p-card-btn.primary:hover {
+            background: var(--accent-dim);
+            box-shadow: 0 0 24px rgba(250,197,21,0.15);
+        }
+        .pricing-trust {
+            text-align: center;
+            margin-top: 28px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .trust-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+        .trust-item svg {
+            flex-shrink: 0;
+        }
+
+        /* ---- Closing ---- */
+        .closing {
+            padding: 100px 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        /* Atmospheric glow behind CTA */
+        .closing::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 1000px;
+            height: 600px;
+            background: radial-gradient(ellipse, rgba(250,180,40,0.16) 0%, rgba(250,197,21,0.07) 40%, transparent 70%);
+            pointer-events: none;
+        }
+        .closing > * { position: relative; z-index: 1; }
+        .closing h2 {
+            font-size: clamp(36px, 5vw, 56px);
+            font-weight: 700;
+            letter-spacing: -0.04em;
+            line-height: 1.1;
+            margin-bottom: 16px;
+        }
+        .closing p {
+            font-size: 16px;
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+        }
+
+        /* ---- FAQ (inline, minimal) ---- */
+        .faq {
+            padding: 0 0 100px;
+        }
+        .faq h2 {
+            font-size: 32px;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .faq-item {
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .faq-q {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            text-align: left;
+        }
+        .faq-q h4 {
+            font-size: 15px;
+            font-weight: 500;
+        }
+        .faq-q:hover h4 { color: var(--text-secondary); }
+        .faq-chevron {
+            color: var(--text-muted);
+            transition: transform 0.3s;
+            flex-shrink: 0;
+            margin-left: 20px;
+            font-size: 18px;
+        }
+        .faq-item.open .faq-chevron { transform: rotate(45deg); }
+        .faq-a {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease;
+        }
+        .faq-item.open .faq-a { max-height: 200px; }
+        .faq-a p {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            padding-bottom: 20px;
+        }
+
+        /* ---- Footer ---- */
+        footer {
+            border-top: 1px solid rgba(255,255,255,0.06);
+            padding: 32px 0;
+        }
+        .footer-disclaimer {
+            font-size: 11px;
+            color: var(--text-muted);
+            line-height: 1.7;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .footer-disclaimer a {
+            color: var(--text-secondary);
+            text-decoration: underline;
+            text-underline-offset: 2px;
+        }
+        .footer-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        .footer-row a {
+            color: var(--text-muted);
+            margin-left: 20px;
+            transition: color 0.2s;
+        }
+        .footer-row a:hover { color: var(--text-secondary); }
+
+        /* ---- Sticky bar ---- */
+        .sticky {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(12,12,14,0.92);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-top: 1px solid rgba(255,255,255,0.06);
+            padding: 10px 0;
+            z-index: 90;
+            transform: translateY(100%);
+            transition: transform 0.3s;
+        }
+        .sticky.on { transform: translateY(0); }
+        .sticky-inner {
+            max-width: 1120px;
+            margin: 0 auto;
+            padding: 0 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .sticky-text {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+        .sticky-text strong { color: var(--text); }
+        .sticky-btn {
+            background: var(--accent);
+            color: #000;
+            padding: 8px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        .sticky-btn:hover { background: var(--accent-dim); }
+
+        /* ---- Floating particles + orbs ---- */
+        .atmosphere {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+            background:
+                radial-gradient(ellipse at 15% 0%, rgba(180,80,20,0.28) 0%, rgba(140,50,10,0.14) 25%, transparent 55%),
+                radial-gradient(ellipse at 85% 5%, rgba(200,100,15,0.22) 0%, rgba(160,70,10,0.1) 25%, transparent 55%),
+                radial-gradient(ellipse at 50% 0%, rgba(250,180,40,0.18) 0%, rgba(200,140,30,0.08) 30%, transparent 60%),
+                radial-gradient(ellipse at 0% 50%, rgba(180,80,20,0.12) 0%, transparent 40%),
+                radial-gradient(ellipse at 100% 40%, rgba(200,100,20,0.1) 0%, transparent 40%);
+        }
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(90px);
+            opacity: 0;
+            animation: drift 18s ease-in-out infinite;
+        }
+        .orb-1 {
+            width: 650px; height: 650px;
+            background: radial-gradient(circle, rgba(250,150,30,0.25) 0%, rgba(200,80,15,0.15) 50%, transparent 70%);
+            top: -5%; left: -8%;
+            animation-delay: 0s;
+        }
+        .orb-2 {
+            width: 500px; height: 500px;
+            background: radial-gradient(circle, rgba(250,180,40,0.2) 0%, rgba(220,120,20,0.12) 50%, transparent 70%);
+            top: 40%; right: -8%;
+            animation-delay: -6s;
+        }
+        .orb-3 {
+            width: 550px; height: 550px;
+            background: radial-gradient(circle, rgba(200,100,20,0.15) 0%, rgba(180,80,15,0.08) 50%, transparent 70%);
+            bottom: 5%; left: 25%;
+            animation-delay: -12s;
+        }
+        @keyframes drift {
+            0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.7; }
+            25% { transform: translate(30px, -40px) scale(1.1); opacity: 0.9; }
+            50% { transform: translate(-20px, 20px) scale(0.95); opacity: 0.6; }
+            75% { transform: translate(40px, 30px) scale(1.05); opacity: 0.85; }
+        }
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(250,180,40,0.7);
+            box-shadow: 0 0 8px rgba(250,160,30,0.4);
+            animation: rise linear infinite;
+        }
+        @keyframes rise {
+            0% { transform: translateY(0) scale(0); opacity: 0; }
+            10% { opacity: 0.9; transform: translateY(-10vh) scale(1); }
+            90% { opacity: 0.3; }
+            100% { transform: translateY(-110vh) scale(0.5); opacity: 0; }
+        }
+
+        /* ---- Animations ---- */
+        .reveal {
+            opacity: 0;
+            transform: translateY(32px);
+            transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .reveal.in {
+            opacity: 1;
+            transform: none;
+        }
+        .reveal-d1 { transition-delay: 0.08s; }
+        .reveal-d2 { transition-delay: 0.16s; }
+        .reveal-d3 { transition-delay: 0.24s; }
+
+        /* ---- Responsive ---- */
+        @media (max-width: 900px) {
+            .product-grid { grid-template-columns: 1fr; gap: 40px; }
+            .bento-grid { grid-template-columns: 1fr; }
+            .bento-card.wide { grid-column: span 1; }
+            .bento-card.tall { grid-row: span 1; }
+            .pricing-grid { grid-template-columns: 1fr 1fr; }
+            .compare-table th, .compare-table td { padding: 12px 16px; }
+        }
+        @media (max-width: 600px) {
+            .hero h1 { font-size: 36px; }
+            .pricing-grid { grid-template-columns: 1fr; max-width: 360px; margin: 0 auto; }
+            .hero { padding: 80px 20px 40px; }
+            .w, .w-narrow { padding: 0 20px; }
+            .sticky-text { display: none; }
+            .footer-row { flex-direction: column; gap: 8px; }
+            .hero-social { flex-direction: column; gap: 4px; }
+            .pricing-trust { flex-direction: column; align-items: center; gap: 10px; }
+            .cta { width: 100%; justify-content: center; min-height: 48px; }
+            .compare-table th, .compare-table td { padding: 10px 12px; font-size: 12px; }
+            .compare h2 { font-size: 28px; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .reveal { opacity: 1; transform: none; transition: none; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Atmosphere: orbs + particles -->
+<div class="atmosphere" id="atmosphere">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+</div>
+
+<!-- ============================================= -->
+<!-- HERO                                          -->
+<!-- ============================================= -->
+<section class="hero">
+    <img src="images/logo-on-dark-alt.png" alt="FlopHero" class="hero-logo reveal">
+
+    <h1 class="reveal reveal-d1">See Where You're<br><em>Losing Money</em></h1>
+
+    <p class="hero-sub reveal reveal-d2">
+        Automated leak detection ranks your Hold'em mistakes by EV cost. No manual review. No setup.
+    </p>
+
+    <a href="https://flophero.com" class="cta reveal reveal-d3">
+        Start Free
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3L11 8L6 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </a>
+    <div class="hero-trust reveal reveal-d3">No credit card <span>·</span> 10 hands/day free <span>·</span> Browser-based</div>
+
+    <div class="hero-social reveal reveal-d3">
+        <span class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+        <q>Removes the guesswork entirely</q>
+        <cite>WorldPokerDeals</cite>
+    </div>
+
+    <div class="hero-media reveal">
+        <div class="hero-media-inner" data-tilt="4">
+            <video autoplay muted loop playsinline poster="images/hero-solver-v2.png">
+                <source src="images/flophero-promo-5s.mp4" type="video/mp4">
+            </video>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================= -->
+<!-- PRODUCT                                       -->
+<!-- ============================================= -->
+<section class="product">
+    <div class="w">
+        <div class="product-grid">
+            <div class="product-visual reveal" data-tilt="4">
+                <img src="images/hf-new-screenshot.png" alt="FlopHero on a real poker player's desk" loading="lazy">
+            </div>
+            <div class="product-text reveal reveal-d1">
+                <h2>Every leak,<br>ranked by cost</h2>
+                <p>FlopHero analyzes your hands automatically and tells you exactly which mistakes cost the most money. No manual review. No guessing.</p>
+                <ul class="product-points">
+                    <li>Automated hand import via Live Tracker</li>
+                    <li>Mistakes ranked by EV loss</li>
+                    <li>GTO solutions for every board</li>
+                    <li>2-3 second river solves</li>
+                    <li>All features on every plan</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================= -->
+<!-- BENTO                                         -->
+<!-- ============================================= -->
+<section class="bento">
+    <div class="w">
+        <div class="bento-grid">
+            <div class="bento-card wide reveal">
+                <h3>Train until it's automatic</h3>
+                <p>Practice GTO decisions on a realistic poker table. Instant feedback shows how much EV you left behind on every hand.</p>
+                <div class="bento-img">
+                    <img src="images/screenshot-trainer-table.png" alt="FlopHero trainer" loading="lazy">
+                </div>
+            </div>
+            <div class="bento-card tall reveal reveal-d1">
+                <div>
+                    <h3>Works everywhere</h3>
+                    <p>Browser-based. Phone, tablet, or desktop. No downloads.</p>
+                </div>
+                <div class="bento-phone">
+                    <div class="bento-phone-frame">
+                        <video autoplay muted loop playsinline>
+                            <source src="images/flophero-demo-vertical.mp4" type="video/mp4">
+                        </video>
+                    </div>
+                </div>
+            </div>
+            <div class="bento-card reveal reveal-d1">
+                <h3>GTO Replayer</h3>
+                <p>Replay any hand against the GTO solution. See exactly where you deviated.</p>
+                <div class="bento-img">
+                    <img src="images/gto-replayer.jpg" alt="FlopHero GTO Replayer" loading="lazy">
+                </div>
+            </div>
+            <div class="bento-card reveal reveal-d1">
+                <h3>Interactive ranges</h3>
+                <p>13×13 matrix with color-coded frequencies. Filter by position and action.</p>
+                <div class="bento-img">
+                    <img src="images/screenshot-range-splits.png" alt="FlopHero ranges" loading="lazy">
+                </div>
+            </div>
+            <div class="bento-card wide reveal reveal-d2">
+                <h3>No feature gating</h3>
+                <p>Every tool on every plan. Solver, trainer, ranges, tracker, session analysis. No tiers. No limits.</p>
+                <div class="bento-metric">100<span>%</span></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================= -->
+<!-- COMPARISON                                    -->
+<!-- ============================================= -->
+<section class="compare">
+    <div class="w-narrow">
+        <h2 class="reveal">FlopHero vs GTO Wizard</h2>
+        <div class="reveal reveal-d1">
+            <table class="compare-table">
+                <thead>
+                    <tr><th></th><th>GTO Wizard</th><th>FlopHero</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Starting price</td><td>$39/mo</td><td class="t-hl">$50/mo</td></tr>
+                    <tr><td>Feature gating</td><td class="t-no">Yes (tiered)</td><td class="t-yes">None</td></tr>
+                    <tr><td>River solve speed</td><td>Varies</td><td class="t-hl">2-4 sec</td></tr>
+                    <tr><td>Hand import</td><td>Manual</td><td class="t-yes">Automatic</td></tr>
+                    <tr><td>Leak ranking by EV</td><td class="t-no">No</td><td class="t-yes">Yes</td></tr>
+                    <tr><td>Tree building</td><td>Required</td><td class="t-yes">Not needed</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================= -->
+<!-- PRICING                                       -->
+<!-- ============================================= -->
+<section class="pricing" id="pricing">
+    <div class="w">
+        <h2 class="reveal">All features. Every plan.</h2>
+        <p class="reveal reveal-d1">Choose based on the stakes you play. 25% off annual.</p>
+
+        <div class="pricing-grid">
+            <div class="p-card reveal">
+                <div class="p-card-name">Free</div>
+                <div class="p-card-price">$0<span>/mo</span></div>
+                <div class="p-card-annual">&nbsp;</div>
+                <ul>
+                    <li>10 hands per day</li>
+                    <li>All features</li>
+                    <li>GTO Library + Solver</li>
+                </ul>
+                <a href="https://flophero.com" class="p-card-btn">Start Free</a>
+            </div>
+            <div class="p-card reveal reveal-d1">
+                <div class="p-card-name">Low Stakes</div>
+                <div class="p-card-price">$50<span>/mo</span></div>
+                <div class="p-card-annual">$37.50/mo annually</div>
+                <ul>
+                    <li>Up to $0.25/$0.50</li>
+                    <li>Unlimited hands</li>
+                    <li>All features</li>
+                </ul>
+                <a href="https://flophero.com" class="p-card-btn">Choose Plan</a>
+            </div>
+            <div class="p-card pop reveal reveal-d2">
+                <div class="p-card-name">Mid Stakes</div>
+                <div class="p-card-price">$100<span>/mo</span></div>
+                <div class="p-card-annual">$75/mo annually</div>
+                <ul>
+                    <li>Up to $2/$4</li>
+                    <li>Unlimited hands</li>
+                    <li>All features</li>
+                </ul>
+                <a href="https://flophero.com" class="p-card-btn primary">Choose Plan</a>
+            </div>
+            <div class="p-card reveal reveal-d3">
+                <div class="p-card-name">High Stakes</div>
+                <div class="p-card-price">$200<span>/mo</span></div>
+                <div class="p-card-annual">$150/mo annually</div>
+                <ul>
+                    <li>All stakes</li>
+                    <li>Unlimited hands</li>
+                    <li>All features</li>
+                </ul>
+                <a href="https://flophero.com" class="p-card-btn">Choose Plan</a>
+            </div>
+        </div>
+
+        <div class="pricing-trust reveal">
+            <div class="trust-item">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1L10 5.5L15 6L11.5 9.5L12.5 14.5L8 12L3.5 14.5L4.5 9.5L1 6L6 5.5L8 1Z" fill="#fac515"/></svg>
+                7-day money-back guarantee
+            </div>
+            <div class="trust-item">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M13.3 4.7L6.5 11.5L2.7 7.7" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Cancel anytime
+            </div>
+            <div class="trust-item">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1.33V8L11.33 9.67M14.67 8A6.67 6.67 0 1 1 1.33 8a6.67 6.67 0 0 1 13.34 0Z" stroke="#8a8a8a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                No setup required
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================= -->
+<!-- CLOSING CTA                                   -->
+<!-- ============================================= -->
+<section class="closing">
+    <div class="w">
+        <h2 class="reveal">Stop guessing.<br>Start seeing.</h2>
+        <p class="reveal reveal-d1">Free to start. No credit card. Browser-based.</p>
+        <a href="https://flophero.com" class="cta reveal reveal-d2">
+            Start Free
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3L11 8L6 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+    </div>
+</section>
+
+
+<!-- ============================================= -->
+<!-- FAQ                                           -->
+<!-- ============================================= -->
+<section class="faq">
+    <div class="w-narrow">
+        <h2 class="reveal">Questions</h2>
+        <div class="reveal">
+            <div class="faq-item">
+                <button class="faq-q"><h4>What's free?</h4><span class="faq-chevron">+</span></button>
+                <div class="faq-a"><p>10 hands per day with full access to every feature. GTO Library, Solver, Trainer, Ranges, Session Tracking. Nothing gated.</p></div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-q"><h4>How is this different from GTO Wizard?</h4><span class="faq-chevron">+</span></button>
+                <div class="faq-a"><p>FlopHero finds mistakes automatically and ranks them by EV cost. No manual uploads, no tree building. Every feature included on every plan.</p></div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-q"><h4>How fast are the solvers?</h4><span class="faq-chevron">+</span></button>
+                <div class="faq-a"><p>Flop and turn solutions load instantly from the pre-calculated library. River solves complete in 2-3 seconds.</p></div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-q"><h4>Refund policy?</h4><span class="faq-chevron">+</span></button>
+                <div class="faq-a"><p>7-day refund guarantee on all paid plans. No questions asked.</p></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================= -->
+<!-- FOOTER                                        -->
+<!-- ============================================= -->
+<footer>
+    <div class="w">
+        <div class="footer-disclaimer">
+            FlopHero is a poker study platform for adult users (18+). It does not offer real money gambling or simulate gambling. Strictly educational. If you or someone you know has a gambling problem, visit <a href="https://www.ncpgambling.org" target="_blank" rel="noopener">ncpgambling.org</a>.
+        </div>
+        <div class="footer-row">
+            <span>&copy; 2026 Algo Software DMCC</span>
+            <div>
+                <a href="https://flophero.com/privacy">Privacy</a>
+                <a href="https://flophero.com/terms">Terms</a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- Sticky CTA -->
+<div class="sticky" id="sticky">
+    <div class="sticky-inner">
+        <span class="sticky-text"><strong>FlopHero</strong> · See where you're losing money</span>
+        <a href="https://flophero.com" class="sticky-btn">Start Free →</a>
+    </div>
+</div>
+
+<script>
+(function(){
+    'use strict';
+
+    // Tilt
+    document.querySelectorAll('[data-tilt]').forEach(el => {
+        const i = +el.dataset.tilt || 6;
+        let h = false;
+        el.addEventListener('mousemove', e => {
+            const r = el.getBoundingClientRect();
+            const rx = ((e.clientY - r.top - r.height/2) / (r.height/2)) * -i;
+            const ry = ((e.clientX - r.left - r.width/2) / (r.width/2)) * i;
+            el.style.transform = `perspective(800px) rotateX(${rx}deg) rotateY(${ry}deg)`;
+            el.style.transition = h ? 'none' : 'transform .1s';
+            h = true;
+        });
+        el.addEventListener('mouseleave', () => {
+            el.style.transform = '';
+            el.style.transition = 'transform .5s ease-out';
+            h = false;
+        });
+    });
+
+    // CTA glow
+    document.querySelectorAll('.cta').forEach(b => {
+        b.addEventListener('mousemove', e => {
+            const r = b.getBoundingClientRect();
+            b.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+            b.style.setProperty('--my', (e.clientY - r.top) + 'px');
+        });
+    });
+
+    // Reveal on scroll
+    const io = new IntersectionObserver(entries => {
+        entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }});
+    }, { threshold: 0.12, rootMargin: '0px 0px -60px 0px' });
+    document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+    // FAQ
+    document.querySelectorAll('.faq-q').forEach(b => {
+        b.addEventListener('click', () => {
+            const it = b.parentElement;
+            const open = it.classList.contains('open');
+            document.querySelectorAll('.faq-item').forEach(f => f.classList.remove('open'));
+            if (!open) it.classList.add('open');
+        });
+    });
+
+    // Sticky
+    const s = document.getElementById('sticky');
+    window.addEventListener('scroll', () => s.classList.toggle('on', scrollY > 700), { passive: true });
+
+    // Floating particles
+    const atm = document.getElementById('atmosphere');
+    function spawnParticle() {
+        const p = document.createElement('div');
+        p.classList.add('particle');
+        const size = 2 + Math.random() * 4;
+        const left = Math.random() * 100;
+        const dur = 8 + Math.random() * 12;
+        const delay = Math.random() * 2;
+        p.style.cssText = `width:${size}px;height:${size}px;left:${left}%;bottom:-10px;animation-duration:${dur}s;animation-delay:${delay}s;`;
+        atm.appendChild(p);
+        setTimeout(() => p.remove(), (dur + delay) * 1000);
+    }
+    // Initial batch
+    for (let i = 0; i < 12; i++) setTimeout(spawnParticle, i * 400);
+    // Continuous
+    setInterval(spawnParticle, 2500);
+})();
+</script>
+</body>
+</html>
